@@ -56,7 +56,7 @@ buttons = [
 ]
 
 def button_clicked(text):
-    display.setText("text")
+    display.setText(text)
 
 for index, text in enumerate(buttons):
     button = QPushButton(text)
