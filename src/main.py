@@ -11,6 +11,9 @@ from PySide6.QtWidgets import (
 
 app = QApplication(sys.argv)
 
+with open("src/styles/main.qss", "r") as file:
+    app.setStyleSheet(file.read())
+
 window = QMainWindow()
 window.setWindowTitle("Kira Calculator")
 window.resize(400, 600)
