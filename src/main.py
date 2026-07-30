@@ -49,24 +49,24 @@ layout.addLayout(grid)
 # <- Add the button here 
 
 buttons = [
-    "7", "8", "9", "+",
+    "7", "8", "9", "÷",
      "4", "5", "6", "×",
     "1", "2", "3", "-",
     "C", "0", "=", "+",
 ]
 
-def button_clicked():
-    print("A button was clicked")
+def button_clicked(text):
+    display.setText("text")
 
 for index, text in enumerate(buttons):
-    buttons = QPushButton(text)
+    button = QPushButton(text)
 
-    buttons.clicked.connect(button_clicked)
+    button.clicked.connect(lambda checked=False, t=text:  button_clicked(t))
 
     row = index //4
     column = index % 4
 
-    grid.addWidget(buttons, row, column)
+    grid.addWidget(button, row, column)
 
 window.show()
 
