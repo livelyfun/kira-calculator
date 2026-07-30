@@ -55,8 +55,13 @@ buttons = [
     "C", "0", "=", "+",
 ]
 
+def button_clicked():
+    print("A button was clicked")
+
 for index, text in enumerate(buttons):
     buttons = QPushButton(text)
+
+    buttons.clicked.connect(button_clicked)
 
     row = index //4
     column = index % 4
