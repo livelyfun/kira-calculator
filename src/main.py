@@ -36,6 +36,11 @@ central_widget.setLayout(layout)
 # -------------------------
 
 display = QLabel("0")
+display.setStyleSheet("""
+    font-size: 36px;
+    border: 2px solid gray;
+    padding: 10px
+""")
 
 layout.addWidget(display)
 
@@ -56,13 +61,19 @@ buttons = [
 ]
 
 def button_clicked(text):
-    display.setText(text)
+    current = display.text()
+
+    if current == "0":
+        display.setText(text)
+    
+    else:
+        display.setText(current + text)
 
 for index, text in enumerate(buttons):
     button = QPushButton(text)
 
     button.clicked.connect(lambda checked=False, t=text:  button_clicked(t))
-
+    
     row = index //4
     column = index % 4
 
