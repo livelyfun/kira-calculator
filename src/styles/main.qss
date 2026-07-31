@@ -1,0 +1,138 @@
+/* ==========================================
+   Main Window
+========================================== */
+
+QMainWindow {
+    background-color: #202124;
+}
+
+QWidget {
+    background-color: #202124;
+}
+
+
+/* ==========================================
+   Display
+========================================== */
+
+QLabel {
+
+    background-color: #2b2b2b;
+    color: white;
+
+    font-size: 36px;
+    font-weight: bold;
+
+    border: 2px solid #444444;
+    border-radius: 15px;
+
+    padding: 20px;
+}
+
+
+/* ==========================================
+   Number Buttons
+========================================== */
+
+QPushButton#numberButton {
+
+    background-color: #3b3b3b;
+    color: white;
+
+    font-size: 22px;
+
+    border: none;
+    border-radius: 12px;
+
+    min-height: 70px;
+}
+
+QPushButton#numberButton:hover {
+    background-color: #505050;
+}
+
+QPushButton#numberButton:pressed {
+    background-color: #707070;
+}
+
+
+/* ==========================================
+   Operator Buttons
+========================================== */
+
+QPushButton#operatorButton {
+
+    background-color: #1f6feb;
+    color: white;
+
+    font-size: 22px;
+
+    border: none;
+    border-radius: 12px;
+
+    min-height: 70px;
+}
+
+QPushButton#operatorButton:hover {
+    background-color: #388bfd;
+}
+
+QPushButton#operatorButton:pressed {
+    background-color: #0d419d;
+}
+
+
+/* ==========================================
+   Equals Button
+========================================== */
+
+QPushButton#equalsButton {
+
+    background-color: #238636;
+    color: white;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    border: none;
+    border-radius: 12px;
+
+    min-height: 70px;
+}
+
+QPushButton#equalsButton:hover {
+    background-color: #2ea043;
+}
+
+QPushButton#equalsButton:pressed {
+    background-color: #196c2e;
+}
+
+
+/* ==========================================
+   Clear Button
+========================================== */
+
+QPushButton#clearButton {
+
+    background-color: #da3633;
+    color: white;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    border: none;
+    border-radius: 12px;
+
+    min-height: 70px;
+}
+
+QPushButton#clearButton:hover {
+    background-color: #f85149;
+}
+
+QPushButton#clearButton:pressed {
+    background-color: #b62324;
+}

@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 from PySide6.QtCore import Qt
 from PySide6.QtWidgets import (
@@ -11,6 +12,7 @@ from PySide6.QtWidgets import (
     QVBoxLayout,
     QWidget,
 )
+
 
 class CalculatorWindow(QMainWindow):
 
@@ -30,19 +32,16 @@ class CalculatorWindow(QMainWindow):
 
         # Main Layout
         self.layout = QVBoxLayout()
-
         self.layout.setSpacing(15)
         self.layout.setContentsMargins(15, 15, 15, 15)
 
         central_widget.setLayout(self.layout)
 
         self.create_display()
-
         self.create_button_grid()
-        
-        
+
     def create_display(self):
-        # Display
+
         self.display = QLabel("0")
 
         self.display.setAlignment(
@@ -59,12 +58,9 @@ class CalculatorWindow(QMainWindow):
 
         self.layout.addWidget(self.display)
 
-        # Grid
-    
     def create_button_grid(self):
-        
-        grid = QGridLayout()
 
+        grid = QGridLayout()
         grid.setSpacing(10)
 
         self.layout.addLayout(grid)
@@ -79,7 +75,18 @@ class CalculatorWindow(QMainWindow):
         for index, text in enumerate(buttons):
 
             button = QPushButton(text)
-
+            # Give each button a style name
+            if text.isdigit():
+                button.setObjectName("numberButton")
+            
+            elif text in ["+", "-", "×", "÷"]:
+                button.setObjectName("operatorButton")
+            
+            elif text == "=":
+                button.setObjectName("equalsButton")
+            
+            elif text == "C":
+                button.setObjectName("clearButton")
             button.clicked.connect(
                 lambda checked=False, t=text: self.button_clicked(t)
             )
@@ -101,7 +108,6 @@ class CalculatorWindow(QMainWindow):
 
         if current == "0":
             self.display.setText(text)
-
         else:
             self.display.setText(current + text)
 
@@ -110,11 +116,13 @@ def main():
 
     app = QApplication(sys.argv)
 
-    with open("src/styles/main.qss") as file:
-        app.setStyleSheet(file.read())
+    style_path = Path(__file__).parent / "styles" / "main.qss"
+
+    if style_path.exists():
+        with open(style_path, "r") as file:
+            app.setStyleSheet(file.read())
 
     window = CalculatorWindow()
-
     window.show()
 
     sys.exit(app.exec())
