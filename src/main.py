@@ -12,102 +12,104 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-app = QApplication(sys.argv)
+class CalculatorWindow(QMainWindow):
 
-# Load stylesheet
-with open("src/styles/main.qss", "r") as file:
-    app.setStyleSheet(file.read())
+    def __init__(self):
+        super().__init__()
 
-# -----------------------
-# Main Window
-# -----------------------
+        self.setWindowTitle("Kira Calculator")
+        self.resize(400, 600)
 
-window = QMainWindow()
-window.setWindowTitle("Kira Calculator")
-window.resize(400, 600)
+        self.create_ui()
 
-# -----------------------
-# Central Widget
-# -----------------------
+    def create_ui(self):
 
-central_widget = QWidget()
-window.setCentralWidget(central_widget)
+        # Central Widget
+        central_widget = QWidget()
+        self.setCentralWidget(central_widget)
 
-# -----------------------
-# Main Layout
-# -----------------------
+        # Main Layout
+        layout = QVBoxLayout()
 
-layout = QVBoxLayout()
-layout.setSpacing(15)
-layout.setContentsMargins(15, 15, 15, 15)
+        layout.setSpacing(15)
+        layout.setContentsMargins(15, 15, 15, 15)
 
-central_widget.setLayout(layout)
+        central_widget.setLayout(layout)
 
-# -----------------------
-# Display
-# -----------------------
+        # Display
+        self.display = QLabel("0")
 
-display = QLabel("0")
+        self.display.setAlignment(
+            Qt.AlignmentFlag.AlignRight
+            | Qt.AlignmentFlag.AlignVCenter
+        )
 
-display.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
+        self.display.setMinimumHeight(100)
 
-display.setMinimumHeight(100)
+        self.display.setSizePolicy(
+            QSizePolicy.Policy.Expanding,
+            QSizePolicy.Policy.Fixed,
+        )
 
-display.setSizePolicy(
-    QSizePolicy.Policy.Expanding,
-    QSizePolicy.Policy.Fixed,
-)
+        layout.addWidget(self.display)
 
-layout.addWidget(display)
+        # Grid
+        grid = QGridLayout()
 
-# -----------------------
-# Button Grid
-# -----------------------
+        grid.setSpacing(10)
 
-grid = QGridLayout()
-grid.setSpacing(10)
+        layout.addLayout(grid)
 
-layout.addLayout(grid)
+        buttons = [
+            "7", "8", "9", "÷",
+            "4", "5", "6", "×",
+            "1", "2", "3", "-",
+            "C", "0", "=", "+",
+        ]
 
-layout.setStretch(0, 0)
-layout.setStretch(1, 1)
+        for index, text in enumerate(buttons):
 
-buttons = [
-    "7", "8", "9", "÷",
-    "4", "5", "6", "×",
-    "1", "2", "3", "-",
-    "C", "0", "=", "+",
-]
+            button = QPushButton(text)
+
+            button.clicked.connect(
+                lambda checked=False, t=text: self.button_clicked(t)
+            )
+
+            row = index // 4
+            column = index % 4
+
+            grid.addWidget(button, row, column)
+
+        for row in range(4):
+            grid.setRowStretch(row, 1)
+
+        for column in range(4):
+            grid.setColumnStretch(column, 1)
+
+    def button_clicked(self, text):
+
+        current = self.display.text()
+
+        if current == "0":
+            self.display.setText(text)
+
+        else:
+            self.display.setText(current + text)
 
 
-def button_clicked(text):
-    current = display.text()
+def main():
 
-    if current == "0":
-        display.setText(text)
-    else:
-        display.setText(current + text)
+    app = QApplication(sys.argv)
+
+    with open("src/styles/main.qss") as file:
+        app.setStyleSheet(file.read())
+
+    window = CalculatorWindow()
+
+    window.show()
+
+    sys.exit(app.exec())
 
 
-for index, text in enumerate(buttons):
-
-    button = QPushButton(text)
-
-    button.clicked.connect(
-        lambda checked=False, t=text: button_clicked(t)
-    )
-
-    row = index // 4
-    column = index % 4
-
-    grid.addWidget(button, row, column)
-
-for row in range(4):
-    grid.setRowStretch(row, 1)
-
-for column in range(4):
-    grid.setColumnStretch(column, 1)
-
-window.show()
-
-app.exec()
+if __name__ == "__main__":
+    main()
