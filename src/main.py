@@ -103,7 +103,17 @@ class CalculatorWindow(QMainWindow):
             grid.setColumnStretch(column, 1)
 
     def button_clicked(self, text):
+        
+        if text == "C":
+            self.clear_display()
 
+        elif text == "=":
+            self.calculate_result()
+
+        else:
+            self.append_text(text)
+
+    def append_text(self, text):        
         current = self.display.text()
 
         if current == "0":
@@ -111,6 +121,14 @@ class CalculatorWindow(QMainWindow):
         else:
             self.display.setText(current + text)
 
+    def clear_display(self):
+
+        self.display.setText("0")
+
+
+    def calculate_result(self):
+
+        pass
 
 def main():
 
