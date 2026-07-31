@@ -127,8 +127,20 @@ class CalculatorWindow(QMainWindow):
 
 
     def calculate_result(self):
-
-        pass
+    
+        expression = self.display.text()
+    
+        # Convert calculator symbols into Python operators
+        expression = expression.replace("×", "*")
+        expression = expression.replace("÷", "/")
+    
+        try:
+            result = eval(expression)
+    
+            self.display.setText(str(result))
+    
+        except Exception:
+            self.display.setText("Error")
 
 def main():
 
