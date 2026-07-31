@@ -29,13 +29,19 @@ class CalculatorWindow(QMainWindow):
         self.setCentralWidget(central_widget)
 
         # Main Layout
-        layout = QVBoxLayout()
+        self.layout = QVBoxLayout()
 
-        layout.setSpacing(15)
-        layout.setContentsMargins(15, 15, 15, 15)
+        self.layout.setSpacing(15)
+        self.layout.setContentsMargins(15, 15, 15, 15)
 
-        central_widget.setLayout(layout)
+        central_widget.setLayout(self.layout)
 
+        self.create_display()
+
+        self.create_button_grid()
+        
+        
+    def create_display(self):
         # Display
         self.display = QLabel("0")
 
@@ -51,14 +57,17 @@ class CalculatorWindow(QMainWindow):
             QSizePolicy.Policy.Fixed,
         )
 
-        layout.addWidget(self.display)
+        self.layout.addWidget(self.display)
 
         # Grid
+    
+    def create_button_grid(self):
+        
         grid = QGridLayout()
 
         grid.setSpacing(10)
 
-        layout.addLayout(grid)
+        self.layout.addLayout(grid)
 
         buttons = [
             "7", "8", "9", "÷",
