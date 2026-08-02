@@ -68,13 +68,30 @@ class CalculatorWindow(QMainWindow):
         self.layout.addLayout(grid)
 
         buttons = [
-            "C", "⌫", "÷", "×",
-            "7", "8", "9", "-",
-            "4", "5", "6", "+",
-            "1", "2", "3", "=",
-            "0", ".",
+            ("C", 0, 0),
+            ("⌫", 0, 1),
+            ("÷", 0, 2),
+            ("×", 0, 3),
+        
+            ("7", 1, 0),
+            ("8", 1, 1),
+            ("9", 1, 2),
+            ("-", 1, 3),
+        
+            ("4", 2, 0),
+            ("5", 2, 1),
+            ("6", 2, 2),
+            ("+", 2, 3),
+        
+            ("1", 3, 0),
+            ("2", 3, 1),
+            ("3", 3, 2),
+            ("=", 3, 3),
+        
+            ("0", 4, 0),
+            (".", 4, 2),
         ]
-        for index, text in enumerate(buttons):
+        for text, row, column in buttons:
 
             button = QPushButton(text)
             # Give each button a style name
@@ -99,17 +116,11 @@ class CalculatorWindow(QMainWindow):
                 lambda checked=False, t=text: self.button_clicked(t)
             )
 
-            row = index // 4
-            column = index % 4
-
             if text == "0":
-                 grid.addWidget(button, 4, 0, 1, 2)
-
-            elif text == ".":
-                 grid.addWidget(button, 4, 2)
-
+                grid.addWidget(button, row, column, 1, 2)
+            
             else:
-                 grid.addWidget(button, row, column)
+                grid.addWidget(button, row, column)
 
     
 
