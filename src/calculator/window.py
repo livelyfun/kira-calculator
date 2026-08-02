@@ -193,10 +193,10 @@ class CalculatorWindow(QMainWindow):
 
 
     def calculate_result(self):
-
+    
         result = calculate(self.display.text())
-
+    
         self.display.setText(result)
-
+    
         if result != "Error":
             self.just_calculated = True

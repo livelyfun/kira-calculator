@@ -1,13 +1,30 @@
-def calculate(expression):
-    """
-    Evaluate a calculator expression.
-    """
+from calculator.parser import prepare_expression
 
-    expression = expression.replace("×", "*")
-    expression = expression.replace("÷", "/")
+
+def evaluate_expression(expression: str) -> str:
+    """
+    Evaluate a prepared expression.
+    """
 
     try:
-        return str(eval(expression))
+        result = eval(expression)
+
+        if isinstance(result, float):
+
+            if result.is_integer():
+                result = int(result)
+
+        return str(result)
 
     except Exception:
         return "Error"
+
+
+def calculate(expression: str) -> str:
+    """
+    Main entry point for calculator logic.
+    """
+
+    prepared = prepare_expression(expression)
+
+    return evaluate_expression(prepared)
