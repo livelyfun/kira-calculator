@@ -118,11 +118,25 @@ class CalculatorWindow(QMainWindow):
     def append_text(self, text):
 
       current = self.display.text()
-
+      
+      operators = ["+", "-", "×", "÷"]
+      
+      # Start fresh after pressing =
       if self.just_calculated:
           self.display.setText(text)
           self.just_calculated = False
           return
+      
+      # Prevent starting with × or ÷
+      if current == "0" and text in ["×", "÷"]:
+          return
+      
+      # Replace the last operator if user presses another operator
+      if current[-1] in operators and text in operators:
+          self.display.setText(current[:-1] + text)
+          return
+      
+      # Replace the initial 0
       if current == "0":
           self.display.setText(text)
       else:
