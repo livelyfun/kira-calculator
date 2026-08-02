@@ -24,6 +24,8 @@ class CalculatorWindow(QMainWindow):
 
         self.create_ui()
 
+        self.just_calculated = False
+
     def create_ui(self):
 
         # Central Widget
@@ -49,7 +51,7 @@ class CalculatorWindow(QMainWindow):
             | Qt.AlignmentFlag.AlignVCenter
         )
 
-        self.display.setMinimumHeight(100)
+        self.display.setMinimumHeight(80)
 
         self.display.setSizePolicy(
             QSizePolicy.Policy.Expanding,
@@ -66,13 +68,30 @@ class CalculatorWindow(QMainWindow):
         self.layout.addLayout(grid)
 
         buttons = [
-            "7", "8", "9", "÷",
-            "4", "5", "6", "×",
-            "1", "2", "3", "-",
-            "C", "0", "=", "+",
+            ("C", 0, 0),
+            ("⌫", 0, 1),
+            ("÷", 0, 2),
+            ("×", 0, 3),
+        
+            ("7", 1, 0),
+            ("8", 1, 1),
+            ("9", 1, 2),
+            ("-", 1, 3),
+        
+            ("4", 2, 0),
+            ("5", 2, 1),
+            ("6", 2, 2),
+            ("+", 2, 3),
+        
+            ("1", 3, 0),
+            ("2", 3, 1),
+            ("3", 3, 2),
+            ("=", 3, 3),
+        
+            ("0", 4, 0),
+            (".", 4, 2),
         ]
-
-        for index, text in enumerate(buttons):
+        for text, row, column in buttons:
 
             button = QPushButton(text)
             # Give each button a style name
@@ -84,33 +103,115 @@ class CalculatorWindow(QMainWindow):
             
             elif text == "=":
                 button.setObjectName("equalsButton")
-            
+           
+            elif text == ".":
+                 button.setObjectName("numberButton")
+
+            elif text == "⌫":
+                button.setObjectName("backspaceButton")     
+
             elif text == "C":
                 button.setObjectName("clearButton")
             button.clicked.connect(
                 lambda checked=False, t=text: self.button_clicked(t)
             )
 
-            row = index // 4
-            column = index % 4
+            if text == "0":
+                grid.addWidget(button, row, column, 1, 2)
+            
+            else:
+                grid.addWidget(button, row, column)
 
-            grid.addWidget(button, row, column)
-
-        for row in range(4):
-            grid.setRowStretch(row, 1)
+    
 
         for column in range(4):
             grid.setColumnStretch(column, 1)
 
     def button_clicked(self, text):
+        
+        if text == "C":
+            self.clear_display()
+
+        elif text == "=":
+            self.calculate_result()
+
+        elif text == "⌫":
+            self.backspace()    
+
+        else:
+            self.append_text(text)
+
+    def append_text(self, text):
+
+      current = self.display.text()
+      
+      operators = ["+", "-", "×", "÷"]
+      
+      # Start fresh after pressing =
+      if self.just_calculated:
+          self.display.setText(text)
+          self.just_calculated = False
+          return
+      
+      # Prevent starting with × or ÷
+      if current == "0" and text in ["×", "÷"]:
+          return
+      
+      # Replace the last operator if user presses another operator
+      if current[-1] in operators and text in operators:
+          self.display.setText(current[:-1] + text)
+          return
+      # Prevent multiple decimal points in the current number
+      if text == ".":
+      
+          last_number = current
+      
+          for operator in ["+", "-", "×", "÷"]:
+              last_number = last_number.split(operator)[-1]
+      
+          if "." in last_number:
+              return
+      # Replace the initial 0
+      if current == "0":
+          self.display.setText(text)
+      else:
+          self.display.setText(current + text)
+          
+    def clear_display(self):
+
+        self.display.setText("0")
+
+    def backspace(self):
 
         current = self.display.text()
 
-        if current == "0":
-            self.display.setText(text)
-        else:
-            self.display.setText(current + text)
+        if current == "Error":
+            self.display.setText("0")
+            return
 
+        if len(current) == 1:
+            self.display.setText("0")
+            return
+
+        self.display.setText(current[:-1])   
+
+
+    def calculate_result(self):
+    
+        expression = self.display.text()
+    
+        # Convert calculator symbols into Python operators
+        expression = expression.replace("×", "*")
+        expression = expression.replace("÷", "/")
+    
+        try:
+            result = eval(expression)
+    
+            self.display.setText(str(result))
+            self.just_calculated = True
+    
+        except Exception:
+            self.display.setText("Error")
 
 def main():
 
