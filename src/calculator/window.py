@@ -1,5 +1,5 @@
 from PySide6.QtCore import Qt
-
+from calculator.logic import calculate
 from PySide6.QtWidgets import (
     QGridLayout,
     QLabel,
@@ -193,18 +193,10 @@ class CalculatorWindow(QMainWindow):
 
 
     def calculate_result(self):
-    
-        expression = self.display.text()
-    
-        # Convert calculator symbols into Python operators
-        expression = expression.replace("×", "*")
-        expression = expression.replace("÷", "/")
-    
-        try:
-            result = eval(expression)
-    
-            self.display.setText(str(result))
+
+        result = calculate(self.display.text())
+
+        self.display.setText(result)
+
+        if result != "Error":
             self.just_calculated = True
-    
-        except Exception:
-            self.display.setText("Error")
