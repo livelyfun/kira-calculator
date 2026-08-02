@@ -51,7 +51,7 @@ class CalculatorWindow(QMainWindow):
             | Qt.AlignmentFlag.AlignVCenter
         )
 
-        self.display.setMinimumHeight(100)
+        self.display.setMinimumHeight(80)
 
         self.display.setSizePolicy(
             QSizePolicy.Policy.Expanding,
@@ -68,12 +68,12 @@ class CalculatorWindow(QMainWindow):
         self.layout.addLayout(grid)
 
         buttons = [
-            "7", "8", "9", "÷",
-            "4", "5", "6", "×",
-            "1", "2", "3", "-",
-            "C", "0", "=", "+",
+            "C", "⌫", "÷", "×",
+            "7", "8", "9", "-",
+            "4", "5", "6", "+",
+            "1", "2", "3", "=",
+            "0", ".",
         ]
-
         for index, text in enumerate(buttons):
 
             button = QPushButton(text)
@@ -86,7 +86,13 @@ class CalculatorWindow(QMainWindow):
             
             elif text == "=":
                 button.setObjectName("equalsButton")
-            
+           
+            elif text == ".":
+                 button.setObjectName("numberButton")
+
+            elif text == "⌫":
+                button.setObjectName("backspaceButton")     
+
             elif text == "C":
                 button.setObjectName("clearButton")
             button.clicked.connect(
@@ -96,10 +102,16 @@ class CalculatorWindow(QMainWindow):
             row = index // 4
             column = index % 4
 
-            grid.addWidget(button, row, column)
+            if text == "0":
+                 grid.addWidget(button, 4, 0, 1, 2)
 
-        for row in range(4):
-            grid.setRowStretch(row, 1)
+            elif text == ".":
+                 grid.addWidget(button, 4, 2)
+
+            else:
+                 grid.addWidget(button, row, column)
+
+    
 
         for column in range(4):
             grid.setColumnStretch(column, 1)
@@ -111,6 +123,9 @@ class CalculatorWindow(QMainWindow):
 
         elif text == "=":
             self.calculate_result()
+
+        elif text == "⌫":
+            self.backspace()    
 
         else:
             self.append_text(text)
@@ -135,7 +150,16 @@ class CalculatorWindow(QMainWindow):
       if current[-1] in operators and text in operators:
           self.display.setText(current[:-1] + text)
           return
+      # Prevent multiple decimal points in the current number
+      if text == ".":
       
+          last_number = current
+      
+          for operator in ["+", "-", "×", "÷"]:
+              last_number = last_number.split(operator)[-1]
+      
+          if "." in last_number:
+              return
       # Replace the initial 0
       if current == "0":
           self.display.setText(text)
@@ -145,6 +169,20 @@ class CalculatorWindow(QMainWindow):
     def clear_display(self):
 
         self.display.setText("0")
+
+    def backspace(self):
+
+        current = self.display.text()
+
+        if current == "Error":
+            self.display.setText("0")
+            return
+
+        if len(current) == 1:
+            self.display.setText("0")
+            return
+
+        self.display.setText(current[:-1])   
 
 
     def calculate_result(self):
