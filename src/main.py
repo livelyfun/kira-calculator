@@ -24,6 +24,8 @@ class CalculatorWindow(QMainWindow):
 
         self.create_ui()
 
+        self.just_calculated = False
+
     def create_ui(self):
 
         # Central Widget
@@ -113,14 +115,19 @@ class CalculatorWindow(QMainWindow):
         else:
             self.append_text(text)
 
-    def append_text(self, text):        
-        current = self.display.text()
+    def append_text(self, text):
 
-        if current == "0":
-            self.display.setText(text)
-        else:
-            self.display.setText(current + text)
+      current = self.display.text()
 
+      if self.just_calculated:
+          self.display.setText(text)
+          self.just_calculated = False
+          return
+      if current == "0":
+          self.display.setText(text)
+      else:
+          self.display.setText(current + text)
+          
     def clear_display(self):
 
         self.display.setText("0")
@@ -138,6 +145,7 @@ class CalculatorWindow(QMainWindow):
             result = eval(expression)
     
             self.display.setText(str(result))
+            self.just_calculated = True
     
         except Exception:
             self.display.setText("Error")
