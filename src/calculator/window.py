@@ -1,4 +1,5 @@
 from PySide6.QtCore import Qt
+from PySide6.QtGui import QKeyEvent
 from calculator.logic import calculate
 from PySide6.QtWidgets import (
     QGridLayout,
@@ -122,7 +123,34 @@ class CalculatorWindow(QMainWindow):
 
         for column in range(4):
             grid.setColumnStretch(column, 1)
-
+    def keyPressEvent(self, event: QKeyEvent):
+    
+        key = event.key()
+        text = event.text()
+    
+        if text.isdigit():
+            self.append_text(text)
+    
+        elif text in ["+", "-", "."]:
+            self.append_text(text)
+    
+        elif text == "*":
+            self.append_text("×")
+    
+        elif text == "/":
+            self.append_text("÷")
+    
+        elif key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
+            self.calculate_result()
+    
+        elif key == Qt.Key.Key_Backspace:
+            self.backspace()
+    
+        elif key == Qt.Key.Key_Escape:
+            self.clear_display()
+    
+        else:
+            super().keyPressEvent(event)
     def button_clicked(self, text):
         
         if text == "C":
