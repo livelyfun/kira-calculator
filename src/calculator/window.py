@@ -6,6 +6,7 @@ from PySide6.QtWidgets import (
     QLabel,
     QMainWindow,
     QPushButton,
+    QListWidget,
     QSizePolicy,
     QVBoxLayout,
     QWidget,
@@ -37,6 +38,7 @@ class CalculatorWindow(QMainWindow):
         central_widget.setLayout(self.layout)
 
         self.create_display()
+        self.create_history()
         self.create_button_grid()
 
     def create_display(self):
@@ -56,6 +58,16 @@ class CalculatorWindow(QMainWindow):
         )
 
         self.layout.addWidget(self.display)
+   
+    def create_history(self):
+
+        self.history = QListWidget()
+
+        self.history.setObjectName("history")
+
+        self.history.setMinimumHeight(120)
+
+        self.layout.addWidget(self.history)    
 
     def create_button_grid(self):
 
@@ -222,7 +234,16 @@ class CalculatorWindow(QMainWindow):
 
     def calculate_result(self):
     
-        result = calculate(self.display.text())
+        expression = self.display.text()
+    
+        result = calculate(expression)
+    
+        if result != "Error":
+        
+            self.history.insertItem(
+                0,
+                f"{expression} = {result}"
+            )
     
         self.display.setText(result)
     
