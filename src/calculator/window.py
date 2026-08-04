@@ -1,16 +1,19 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeyEvent
-from calculator.logic import calculate
 from PySide6.QtWidgets import (
     QGridLayout,
+    QHBoxLayout,
     QLabel,
+    QListWidget,
     QMainWindow,
     QPushButton,
-    QListWidget,
     QSizePolicy,
     QVBoxLayout,
     QWidget,
 )
+
+from calculator.logic import calculate
+
 
 class CalculatorWindow(QMainWindow):
 
@@ -18,28 +21,55 @@ class CalculatorWindow(QMainWindow):
         super().__init__()
 
         self.setWindowTitle("Kira Calculator")
-        self.resize(400, 600)
+        self.resize(750, 650)
+        self.setMinimumSize(700, 600)
+        self.setMaximumSize(900,700)
 
         self.create_ui()
 
         self.just_calculated = False
 
     def create_ui(self):
-
-        # Central Widget
+    
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
+    
+        self.main_layout = QHBoxLayout()
+        self.main_layout.setSpacing(15)
+        self.main_layout.setContentsMargins(15, 15, 15, 15)
+    
+        central_widget.setLayout(self.main_layout)
+    
+        # ==========================
+        # Left Side (Calculator)
+        # ==========================
 
-        # Main Layout
-        self.layout = QVBoxLayout()
-        self.layout.setSpacing(15)
-        self.layout.setContentsMargins(15, 15, 15, 15)
-
-        central_widget.setLayout(self.layout)
+        self.calculator_layout = QVBoxLayout()
+        self.calculator_layout.setSpacing(15)
 
         self.create_display()
-        self.create_history()
         self.create_button_grid()
+
+        calculator_widget = QWidget()
+        calculator_widget.setLayout(self.calculator_layout)
+        calculator_widget.setMinimumWidth(430)
+
+        self.main_layout.addWidget(calculator_widget, 4)
+
+        # ==========================
+        # Right Side (History)
+        # ==========================
+
+        self.history_layout = QVBoxLayout()
+        self.history_layout.setSpacing(10)
+
+        self.create_history()
+
+        history_widget = QWidget()
+        history_widget.setLayout(self.history_layout)
+        history_widget.setMinimumWidth(260)
+
+        self.main_layout.addWidget(history_widget, 2)
 
     def create_display(self):
 
@@ -50,31 +80,31 @@ class CalculatorWindow(QMainWindow):
             | Qt.AlignmentFlag.AlignVCenter
         )
 
-        self.display.setMinimumHeight(80)
+        self.display.setMinimumHeight(100)
 
         self.display.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Fixed,
         )
 
-        self.layout.addWidget(self.display)
+        self.calculator_layout.addWidget(self.display)
    
     def create_history(self):
-
+        
         self.history = QListWidget()
 
         self.history.setObjectName("history")
 
         self.history.setMinimumHeight(120)
 
-        self.layout.addWidget(self.history)    
+        self.history_layout.addWidget(self.history)    
 
     def create_button_grid(self):
 
         grid = QGridLayout()
         grid.setSpacing(10)
 
-        self.layout.addLayout(grid)
+        self.calculator_layout.addLayout(grid)
 
         buttons = [
             ("C", 0, 0),
@@ -140,10 +170,7 @@ class CalculatorWindow(QMainWindow):
         key = event.key()
         text = event.text()
     
-        if text.isdigit():
-            self.append_text(text)
-    
-        elif text in ["+", "-", "."]:
+        if text.isdigit() or text in ["+", "-", "."]:
             self.append_text(text)
     
         elif text == "*":

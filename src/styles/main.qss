@@ -44,7 +44,7 @@ QPushButton#numberButton {
     border: none;
     border-radius: 12px;
 
-    min-height: 60px;
+    min-height: 75px;
 }
 
 QPushButton#numberButton:hover {
@@ -70,7 +70,7 @@ QPushButton#operatorButton {
     border: none;
     border-radius: 12px;
 
-    min-height: 60px;
+    min-height: 75px;
 }
 
 QPushButton#operatorButton:hover {
@@ -98,7 +98,7 @@ QPushButton#equalsButton {
     border: none;
     border-radius: 12px;
 
-    min-height: 60px;
+    min-height: 75px;
 }
 
 QPushButton#equalsButton:hover {
@@ -126,7 +126,7 @@ QPushButton#clearButton {
     border: none;
     border-radius: 12px;
 
-    min-height: 60px;
+    min-height: 75px;
 }
 
 QPushButton#backspaceButton {
@@ -141,7 +141,7 @@ QPushButton#backspaceButton {
     border: none;
     border-radius: 12px;
 
-    min-height: 60px;
+    min-height: 75px;
 }
 
 QPushButton#backspaceButton:hover {
@@ -174,19 +174,9 @@ QListWidget#history {
 
     border-radius: 12px;
 
-    font-size: 16px;
+    font-size: 18px;
 
-    padding: 8px;
-}
+    padding: 15px;
 
-QListWidget#history::item {
-
-    padding: 8px;
-}
-
-QListWidget#history::item:selected {
-
-    background-color: #1f6feb;
-
-    border-radius: 6px;
+    min-width: 230px;
 }
