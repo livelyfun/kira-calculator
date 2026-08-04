@@ -6,7 +6,6 @@ from PySide6.QtWidgets import QApplication
 from calculator.window import CalculatorWindow
 
 
-
 def main():
 
     app = QApplication(sys.argv)
