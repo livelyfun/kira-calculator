@@ -180,3 +180,80 @@ QListWidget#history {
 
     min-width: 230px;
 }
+
+/* ==========================================
+   History Title
+========================================== */
+
+QLabel#historyTitle {
+
+    color: white;
+
+    font-size: 22px;
+
+    font-weight: bold;
+
+    padding-left: 6px;
+}
+
+/* ==========================================
+   Clear History Button
+========================================== */
+
+QPushButton#clearHistoryButton {
+
+    background-color: #444444;
+
+    color: white;
+
+    border-radius: 10px;
+
+    min-height: 45px;
+
+    font-size: 16px;
+}
+
+QPushButton#clearHistoryButton:hover {
+
+    background-color: #555555;
+}
+
+QPushButton#clearHistoryButton:pressed {
+
+    background-color: #333333;
+}
+
+QScrollBar:vertical {
+
+    background: #2b2b2b;
+
+    width: 12px;
+
+    border-radius: 6px;
+}
+
+QScrollBar::handle:vertical {
+
+    background: #666666;
+
+    border-radius: 6px;
+
+    min-height: 40px;
+}
+
+QScrollBar::handle:vertical:hover {
+
+    background: #888888;
+}
+
+QScrollBar::add-line:vertical,
+QScrollBar::sub-line:vertical {
+
+    height: 0px;
+}
+
+QScrollBar::add-page:vertical,
+QScrollBar::sub-page:vertical {
+
+    background: none;
+}
