@@ -9,14 +9,12 @@ def evaluate_expression(expression: str) -> str:
     try:
         result = eval(expression)
 
-        if isinstance(result, float):
-
-            if result.is_integer():
-                result = int(result)
+        if isinstance(result, float) and result.is_integer():
+            result = int(result)
 
         return str(result)
 
-    except Exception:
+    except Exception:  # noqa: BLE001
         return "Error"
 
 
