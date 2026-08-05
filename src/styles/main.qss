@@ -257,3 +257,31 @@ QScrollBar::sub-page:vertical {
 
     background: none;
 }
+
+/* ==========================================
+   Scientific Buttons
+========================================== */
+
+QPushButton#scientificButton {
+
+    background-color: #5b4c8a;
+    color: white;
+
+    border: none;
+
+    border-radius: 12px;
+
+    font-size:18px;
+
+    min-height:60px;
+}
+
+QPushButton#scientificButton:hover {
+
+    background:#6d5fa0;
+}
+
+QPushButton#scientificButton:pressed {
+
+    background:#4a3d74;
+}
