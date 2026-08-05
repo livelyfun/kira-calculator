@@ -3,7 +3,7 @@ from pathlib import Path
 
 from PySide6.QtWidgets import QApplication
 
-from calculator.window import CalculatorWindow
+from ui.window import CalculatorWindow
 
 
 def main():
