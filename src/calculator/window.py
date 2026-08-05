@@ -90,14 +90,26 @@ class CalculatorWindow(QMainWindow):
         self.calculator_layout.addWidget(self.display)
    
     def create_history(self):
-        
-        self.history = QListWidget()
 
+        title = QLabel("History")
+        title.setObjectName("historyTitle")
+
+        self.history = QListWidget()
         self.history.setObjectName("history")
 
-        self.history.setMinimumHeight(120)
+        self.history.itemDoubleClicked.connect(
+            self.restore_history
+        )
 
-        self.history_layout.addWidget(self.history)    
+        clear_button = QPushButton("Clear History")
+        clear_button.setObjectName("clearHistoryButton")
+        clear_button.clicked.connect(
+            self.history.clear
+        )
+
+        self.history_layout.addWidget(title)
+        self.history_layout.addWidget(self.history)
+        self.history_layout.addWidget(clear_button)  
 
     def create_button_grid(self):
 
@@ -276,3 +288,13 @@ class CalculatorWindow(QMainWindow):
     
         if result != "Error":
             self.just_calculated = True
+
+    def restore_history(self, item):
+
+        text = item.text()
+    
+        expression = text.split("=")[0].strip()
+    
+        self.display.setText(expression)
+    
+        self.just_calculated = False        
