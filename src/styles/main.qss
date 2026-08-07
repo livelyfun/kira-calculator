@@ -16,7 +16,6 @@ QWidget {
 ========================================== */
 
 QLabel {
-
     background-color: #2b2b2b;
     color: white;
 
@@ -27,6 +26,35 @@ QLabel {
     border-radius: 15px;
 
     padding: 20px;
+}
+
+
+/* ==========================================
+   Scientific Buttons
+========================================== */
+
+QPushButton#scientificButton {
+
+    background-color: #5B4B8A;
+    color: white;
+
+    font-size: 16px;
+    font-weight: 500;
+
+    border: none;
+    border-radius: 9px;
+
+    min-height: 42px;
+    max-height: 42px;
+    min-width: 70px;
+}
+
+QPushButton#scientificButton:hover {
+    background-color: #6D5AA8;
+}
+
+QPushButton#scientificButton:pressed {
+    background-color: #4A3C74;
 }
 
 
@@ -42,9 +70,9 @@ QPushButton#numberButton {
     font-size: 22px;
 
     border: none;
-    border-radius: 12px;
+    border-radius: 11px;
 
-    min-height: 75px;
+    min-height: 60px;
 }
 
 QPushButton#numberButton:hover {
@@ -68,9 +96,9 @@ QPushButton#operatorButton {
     font-size: 22px;
 
     border: none;
-    border-radius: 12px;
+    border-radius: 11px;
 
-    min-height: 75px;
+    min-height: 60px;
 }
 
 QPushButton#operatorButton:hover {
@@ -92,13 +120,12 @@ QPushButton#equalsButton {
     color: white;
 
     font-size: 22px;
-
     font-weight: bold;
 
     border: none;
-    border-radius: 12px;
+    border-radius: 11px;
 
-    min-height: 75px;
+    min-height: 60px;
 }
 
 QPushButton#equalsButton:hover {
@@ -120,36 +147,12 @@ QPushButton#clearButton {
     color: white;
 
     font-size: 22px;
-
     font-weight: bold;
 
     border: none;
-    border-radius: 12px;
+    border-radius: 11px;
 
-    min-height: 75px;
-}
-
-QPushButton#backspaceButton {
-
-    background-color: #8b5cf6;
-    color: white;
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    border: none;
-    border-radius: 12px;
-
-    min-height: 75px;
-}
-
-QPushButton#backspaceButton:hover {
-    background-color: #9f6eff;
-}
-
-QPushButton#backspaceButton:pressed {
-    background-color: #6d3fd6;
+    min-height: 60px;
 }
 
 QPushButton#clearButton:hover {
@@ -160,41 +163,87 @@ QPushButton#clearButton:pressed {
     background-color: #b62324;
 }
 
+
+/* ==========================================
+   Backspace Button
+========================================== */
+
+QPushButton#backspaceButton {
+
+    background-color: #8b5cf6;
+    color: white;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    border: none;
+    border-radius: 11px;
+
+    min-height: 60px;
+}
+
+QPushButton#backspaceButton:hover {
+    background-color: #9f6eff;
+}
+
+QPushButton#backspaceButton:pressed {
+    background-color: #6d3fd6;
+}
+
+
 /* ==========================================
    History Panel
+========================================== */
+
+QLabel#historyTitle {
+
+    background-color: #2b2b2b;
+    color: white;
+
+    font-size: 22px;
+    font-weight: bold;
+
+    border: 2px solid #444444;
+    border-radius: 12px;
+
+    padding: 18px;
+}
+
+
+/* ==========================================
+   History List
 ========================================== */
 
 QListWidget#history {
 
     background-color: #2b2b2b;
-
     color: white;
 
     border: 2px solid #444444;
-
     border-radius: 12px;
 
-    font-size: 18px;
+    font-size: 17px;
 
-    padding: 15px;
-
-    min-width: 230px;
+    padding: 10px;
 }
 
-/* ==========================================
-   History Title
-========================================== */
+QListWidget#history::item {
 
-QLabel#historyTitle {
+    padding: 12px;
 
-    color: white;
-
-    font-size: 22px;
-
-    font-weight: bold;
-
-    padding-left: 6px;
+    border-radius: 8px;
 }
+
+QListWidget#history::item:hover {
+
+    background-color: #3a3a3a;
+}
+
+QListWidget#history::item:selected {
+
+    background-color: #444444;
+}
+
 
 /* ==========================================
    Clear History Button
@@ -203,9 +252,9 @@ QLabel#historyTitle {
 QPushButton#clearHistoryButton {
 
     background-color: #444444;
-
     color: white;
 
+    border: none;
     border-radius: 10px;
 
     min-height: 45px;
@@ -214,35 +263,39 @@ QPushButton#clearHistoryButton {
 }
 
 QPushButton#clearHistoryButton:hover {
-
     background-color: #555555;
 }
 
 QPushButton#clearHistoryButton:pressed {
-
     background-color: #333333;
 }
+
+
+/* ==========================================
+   Scrollbar
+========================================== */
 
 QScrollBar:vertical {
 
     background: #2b2b2b;
 
-    width: 12px;
+    width: 10px;
 
-    border-radius: 6px;
+    border-radius: 5px;
+
+    margin: 4px 2px 4px 0;
 }
 
 QScrollBar::handle:vertical {
 
     background: #666666;
 
-    border-radius: 6px;
+    border-radius: 5px;
 
     min-height: 40px;
 }
 
 QScrollBar::handle:vertical:hover {
-
     background: #888888;
 }
 
@@ -255,33 +308,5 @@ QScrollBar::sub-line:vertical {
 QScrollBar::add-page:vertical,
 QScrollBar::sub-page:vertical {
 
-    background: none;
-}
-
-/* ==========================================
-   Scientific Buttons
-========================================== */
-
-QPushButton#scientificButton {
-
-    background-color: #5b4c8a;
-    color: white;
-
-    border: none;
-
-    border-radius: 12px;
-
-    font-size:18px;
-
-    min-height:60px;
-}
-
-QPushButton#scientificButton:hover {
-
-    background:#6d5fa0;
-}
-
-QPushButton#scientificButton:pressed {
-
-    background:#4a3d74;
+    background: transparent;
 }

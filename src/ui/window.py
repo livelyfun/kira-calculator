@@ -1,7 +1,6 @@
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import (
-    QGridLayout,
     QHBoxLayout,
     QLabel,
     QListWidget,
@@ -20,15 +19,14 @@ from widgets.mode_bar import ModeBar
 from widgets.programmer_page import ProgrammerPage
 
 
-
 class CalculatorWindow(QMainWindow):
     def __init__(self):
         super().__init__()
 
         self.setWindowTitle("Kira Calculator")
-        self.resize(750, 650)
-        self.setMinimumSize(700, 600)
-        self.setMaximumSize(900, 700)
+        self.resize(820, 700)
+        self.setMinimumSize(800, 620)
+        self.setMaximumSize(900, 800)
 
         self.create_ui()
 
@@ -111,9 +109,9 @@ class CalculatorWindow(QMainWindow):
 
         calculator_widget = QWidget()
         calculator_widget.setLayout(self.calculator_layout)
-        calculator_widget.setMinimumWidth(430)
+        calculator_widget.setMinimumWidth(500)
 
-        self.main_layout.addWidget(calculator_widget, 4)
+        self.main_layout.addWidget(calculator_widget, 5)
 
         # ==========================
         # Right Side (History)
@@ -126,7 +124,7 @@ class CalculatorWindow(QMainWindow):
 
         history_widget = QWidget()
         history_widget.setLayout(self.history_layout)
-        history_widget.setMinimumWidth(260)
+        history_widget.setMinimumWidth(240)
 
         self.main_layout.addWidget(history_widget, 2)
 

@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QWidget, QPushButton, QHBoxLayout
+from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
 
 
 class ModeBar(QWidget):
