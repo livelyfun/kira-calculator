@@ -1,3 +1,5 @@
+import math
+
 from .parser import Parser
 from .tokenizer import tokenize
 
@@ -10,8 +12,10 @@ def calculate(expression: str):
 
         result = parser.parse()
 
+        result = round(result, 12)
+        
         if result == int(result):
-            return str(int(result))
+            result = int(result)
 
         return str(result)
 
