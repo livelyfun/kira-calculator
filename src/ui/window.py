@@ -309,16 +309,16 @@ class CalculatorWindow(QMainWindow):
             self.append_text("e")
 
         elif text == "x²":
-            self.append_text("**2")
+            self.append_text("^2")
 
         elif text == "xʸ":
-            self.append_text("**")
+            self.append_text("^")
 
         elif text == "1/x":
             self.append_text("1/(")
 
         elif text == "%":
-            self.append_text("/100")
+            self.append_text("%")
 
         elif text == "±":
 

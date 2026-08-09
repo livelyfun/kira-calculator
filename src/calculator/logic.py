@@ -1,28 +1,19 @@
-from calculator.parser import prepare_expression
+from .parser import Parser
+from .tokenizer import tokenize
 
 
-def evaluate_expression(expression: str) -> str:
-    """
-    Evaluate a prepared expression.
-    """
-
+def calculate(expression: str):
     try:
-        result = eval(expression)
+        tokens = tokenize(expression)
 
-        if isinstance(result, float) and result.is_integer():
-            result = int(result)
+        parser = Parser(tokens)
+
+        result = parser.parse()
+
+        if result == int(result):
+            return str(int(result))
 
         return str(result)
 
-    except Exception:  # noqa: BLE001
+    except (ValueError, ZeroDivisionError):
         return "Error"
-
-
-def calculate(expression: str) -> str:
-    """
-    Main entry point for calculator logic.
-    """
-
-    prepared = prepare_expression(expression)
-
-    return evaluate_expression(prepared)
