@@ -28,6 +28,8 @@ class CalculatorWindow(QMainWindow):
         self.setMinimumSize(800, 620)
         self.setMaximumSize(900, 800)
 
+        self.angle_mode = "DEG"
+
         self.create_ui()
 
         self.just_calculated = False
@@ -56,6 +58,9 @@ class CalculatorWindow(QMainWindow):
         self.stack = QStackedWidget()
 
         self.calculator_page = CalculatorPage()
+        self.calculator_page.angle_selector.currentTextChanged.connect(
+             self.angle_mode_changed
+        )
         for text, button in self.calculator_page.buttons.items():
        
            if text in [
@@ -262,7 +267,10 @@ class CalculatorWindow(QMainWindow):
 
         expression = self.display.text()
 
-        result = calculate(expression)
+        result = calculate(
+            expression,
+            angle_mode=self.angle_mode,
+        )
 
         if result != "Error":
             self.history.insertItem(0, f"{expression} = {result}")
@@ -334,3 +342,7 @@ class CalculatorWindow(QMainWindow):
 
         else:
             self.append_text(text)
+
+    def angle_mode_changed(self, mode):
+
+        self.angle_mode = mode        

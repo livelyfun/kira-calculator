@@ -1,4 +1,5 @@
 from PySide6.QtWidgets import (
+    QComboBox,
     QGridLayout,
     QPushButton,
     QVBoxLayout,
@@ -17,8 +18,22 @@ class CalculatorPage(QWidget):
 
         self.buttons = {}
 
+        self.create_angle_selector()
         self.create_scientific_grid()
         self.create_basic_grid()
+
+    def create_angle_selector(self):
+    
+        self.angle_selector = QComboBox()
+    
+        self.angle_selector.addItems([
+            "DEG",
+            "RAD",
+        ])
+    
+        self.angle_selector.setCurrentText("DEG")
+    
+        self.layout.addWidget(self.angle_selector)
 
     def create_scientific_grid(self):
 
