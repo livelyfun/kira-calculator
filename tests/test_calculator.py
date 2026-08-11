@@ -73,3 +73,23 @@ def test_invalid_square_root():
 
 def test_invalid_logarithm():
     assert calculate("log(-5)") == "Error"
+
+def test_sine_radians():
+    result = float(
+        calculate("sin(1.5707963267948966)", "RAD")
+    )
+    assert abs(result - 1) < 1e-10
+
+
+def test_cosine_radians():
+    result = float(
+        calculate("cos(3.141592653589793)", "RAD")
+    )
+    assert abs(result + 1) < 1e-10
+
+
+def test_tangent_radians():
+    result = float(
+        calculate("tan(0.7853981633974483)", "RAD")
+    )
+    assert abs(result - 1) < 1e-10
