@@ -105,17 +105,9 @@ class CalculatorWindow(QMainWindow):
 
         self.calculator_layout.addWidget(self.stack)
 
-        self.mode_bar.calculator_button.clicked.connect(
-            lambda: self.stack.setCurrentIndex(0)
-        )
-
-        self.mode_bar.programmer_button.clicked.connect(
-            lambda: self.stack.setCurrentIndex(1)
-        )
-
-        self.mode_bar.converter_button.clicked.connect(
-            lambda: self.stack.setCurrentIndex(2)
-        )
+        self.mode_bar.calculator_button.clicked.connect(self.show_calculator_mode)
+        self.mode_bar.programmer_button.clicked.connect(self.show_programmer_mode)
+        self.mode_bar.converter_button.clicked.connect(self.show_converter_mode)
 
         calculator_widget = QWidget()
         calculator_widget.setLayout(self.calculator_layout)
@@ -137,6 +129,18 @@ class CalculatorWindow(QMainWindow):
         history_widget.setMinimumWidth(240)
 
         self.main_layout.addWidget(history_widget, 2)
+
+    def show_calculator_mode(self) -> None:
+        self.stack.setCurrentIndex(0)
+        self.display.show()
+
+    def show_programmer_mode(self) -> None:
+        self.stack.setCurrentIndex(1)
+        self.display.hide()
+
+    def show_converter_mode(self) -> None:
+        self.stack.setCurrentIndex(2)
+        self.display.hide()
 
     def create_display(self):
 

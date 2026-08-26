@@ -41,3 +41,19 @@ class InvalidNumberError(CalculatorError):
 
 class CalculatorOverflowError(CalculatorError):
     """Raised when a calculation exceeds floating point representation limits."""
+
+
+class ProgrammerError(CalculatorError):
+    """Base class for programmer-mode integer errors."""
+
+
+class InvalidProgrammerNumberError(ProgrammerError):
+    """Raised when a value is invalid for the selected number base."""
+
+
+class ProgrammerDivisionByZeroError(ProgrammerError):
+    """Raised when programmer-mode division uses a zero divisor."""
+
+
+class ProgrammerShiftError(ProgrammerError):
+    """Raised when a shift count is negative or exceeds the word size."""
