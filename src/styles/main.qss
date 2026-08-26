@@ -310,3 +310,50 @@ QScrollBar::sub-page:vertical {
 
     background: transparent;
 }
+
+/* ==========================================
+   Angle Mode Selector
+========================================== */
+
+QComboBox#angleSelector {
+
+    background-color: #3b3b3b;
+    color: white;
+
+    font-size: 16px;
+    font-weight: bold;
+
+    border: 1px solid #555555;
+    border-radius: 8px;
+
+    padding: 6px 12px;
+
+    min-height: 32px;
+    max-height: 32px;
+}
+
+QComboBox#angleSelector:hover {
+
+    background-color: #4a4a4a;
+}
+
+QComboBox#angleSelector:focus {
+
+    border: 1px solid #6D5AA8;
+}
+
+QComboBox#angleSelector::drop-down {
+
+    border: none;
+    width: 28px;
+}
+
+QComboBox#angleSelector QAbstractItemView {
+
+    background-color: #2b2b2b;
+    color: white;
+
+    border: 1px solid #555555;
+    selection-background-color: #5B4B8A;
+    selection-color: white;
+}

@@ -23,16 +23,17 @@ class CalculatorPage(QWidget):
         self.create_basic_grid()
 
     def create_angle_selector(self):
-    
+
         self.angle_selector = QComboBox()
-    
+        self.angle_selector.setObjectName("angleSelector")
+
         self.angle_selector.addItems([
             "DEG",
             "RAD",
         ])
-    
+
         self.angle_selector.setCurrentText("DEG")
-    
+
         self.layout.addWidget(self.angle_selector)
 
     def create_scientific_grid(self):
