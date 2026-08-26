@@ -31,22 +31,25 @@ def format_number(value: float, precision: int = 12) -> str:
         return "NaN"
     if math.isinf(value):
         return "Infinity" if value > 0 else "-Infinity"
+    if value == 0.0:
+        return "0"
+
+    abs_val = abs(value)
+
+    # Use scientific notation for very large (>= 1e15) or tiny (< 1e-9) magnitudes
+    if (abs_val >= 1e15) or (abs_val < 1e-9):
+        formatted = f"{value:.8e}"
+        # Clean up exponent formatting (e.g. 1.20000000e+05 -> 1.2e+5)
+        base, exp = formatted.split("e")
+        base = base.rstrip("0").rstrip(".")
+        exp_int = int(exp)
+        return f"{base}e{exp_int}"
 
     # Check for near-integer values
     rounded = round(value, precision)
     if math.isclose(value, round(value), abs_tol=1e-11):
         int_val = int(round(value))
         return str(int_val)
-
-    # Use scientific notation for very large or tiny magnitudes
-    abs_val = abs(rounded)
-    if (abs_val >= 1e15) or (0 < abs_val < 1e-9):
-        formatted = f"{rounded:.8e}"
-        # Clean up exponent formatting (e.g. 1.2000e+05 -> 1.2e+5)
-        base, exp = formatted.split("e")
-        base = base.rstrip("0").rstrip(".")
-        exp_int = int(exp)
-        return f"{base}e{exp_int}"
 
     # Standard decimal representation
     formatted = f"{rounded:.{precision}f}".rstrip("0").rstrip(".")
@@ -84,7 +87,7 @@ def evaluate_expression(
     except Exception as err:
         return CalculationResult(
             success=False,
-            formatted_value=f"Error: {err}",
+            formatted_value="Calculation error",
             numeric_value=None,
             error_message=str(err),
         )

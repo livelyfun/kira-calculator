@@ -30,6 +30,7 @@ class CalculatorPage(QWidget):
             [
                 "DEG",
                 "RAD",
+                "GRAD",
             ]
         )
 

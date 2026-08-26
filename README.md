@@ -46,6 +46,9 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
+`.venv` is the project's supported local environment. Run commands through
+`.venv/bin/python` when it is not activated.
+
 ### Running the Application
 
 Launch the calculator:
@@ -56,10 +59,10 @@ python src/main.py
 
 ### Running Tests
 
-Run the test suite with `pytest`:
+Run the test suite with the project environment:
 
 ```bash
-pytest
+./.venv/bin/python -m pytest
 ```
 
 ### Code Formatting & Linting

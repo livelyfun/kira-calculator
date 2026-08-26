@@ -7,10 +7,12 @@ from src.calculator.errors import (
     CalculatorOverflowError,
     CalculatorSyntaxError,
     DivisionByZeroError,
+    InvalidNumberError,
+    UnknownConstantError,
     UnknownFunctionError,
 )
 from src.calculator.evaluator import AngleMode, Evaluator
-from src.calculator.logic import calculate, evaluate_expression
+from src.calculator.logic import calculate, evaluate_expression, format_number
 from src.calculator.parser import Parser
 from src.calculator.tokenizer import tokenize
 
@@ -50,7 +52,7 @@ def test_parentheses():
 
 
 # ==========================================
-# 2. Power & Associativity
+# 2. Power, Precedence & Associativity
 # ==========================================
 
 
@@ -69,6 +71,15 @@ def test_power_with_parentheses():
     assert calculate("(2 ^ 3) ^ 2") == "64"
 
 
+def test_unary_minus_power_precedence():
+    # In standard math: -2^2 == -(2^2) == -4
+    assert calculate("-2^2") == "-4"
+    assert calculate("(-2)^2") == "4"
+    assert calculate("-(2^2)") == "-4"
+    assert calculate("2^-2") == "0.25"
+    assert calculate("-2^-2") == "-0.25"
+
+
 # ==========================================
 # 3. Decimals & Scientific Notation
 # ==========================================
@@ -78,6 +89,8 @@ def test_decimal_arithmetic():
     assert calculate("2.5 × 4") == "10"
     assert calculate("0.1 + 0.2") == "0.3"
     assert calculate("1.25 + 2.75") == "4"
+    assert calculate(".5 + .5") == "1"
+    assert calculate("5. + 2.") == "7"
 
 
 def test_scientific_notation():
@@ -85,6 +98,19 @@ def test_scientific_notation():
     assert calculate("2.5e3") == "2500"
     assert calculate("1e-3") == "0.001"
     assert calculate("1e5 × 1e-3") == "100"
+    assert calculate("1.5e+3") == "1500"
+    assert calculate("2e5") == "200000"
+
+
+def test_scientific_notation_vs_constant_e():
+    # 'e' is mathematical constant Euler's number
+    assert math.isclose(float(calculate("e")), math.e, rel_tol=1e-11)
+    # '2e' is implicit multiplication 2 * e
+    assert math.isclose(float(calculate("2e")), 2 * math.e, rel_tol=1e-11)
+    # '1e' is 1 * e
+    assert math.isclose(float(calculate("1e")), math.e, rel_tol=1e-11)
+    # '2e5' is 2 * 10^5 = 200000 (scientific notation)
+    assert calculate("2e5") == "200000"
 
 
 # ==========================================
@@ -119,6 +145,7 @@ def test_implicit_multiplication_with_parentheses():
     assert calculate("2(3)") == "6"
     assert calculate("(2 + 3)(4 + 1)") == "25"
     assert calculate("3(2 + 4)") == "18"
+    assert calculate("2(3+4)") == "14"
 
 
 def test_implicit_multiplication_with_constants():
@@ -128,10 +155,15 @@ def test_implicit_multiplication_with_constants():
     res_e = float(calculate("3e"))
     assert math.isclose(res_e, 3 * math.e, rel_tol=1e-11)
 
+    res_pi_paren = float(calculate("pi(2)"))
+    assert math.isclose(res_pi_paren, 2 * math.pi, rel_tol=1e-11)
+
 
 def test_implicit_multiplication_with_functions():
     assert calculate("2sin(90)") == "2"
     assert calculate("3sqrt(16)") == "12"
+    assert calculate("(2+3)sin(90)") == "5"
+    assert calculate("sin(90)cos(0)") == "1"
 
 
 # ==========================================
@@ -145,6 +177,7 @@ def test_factorial():
     assert calculate("5!") == "120"
     assert calculate("factorial(5)") == "120"
     assert calculate("3! + 4!") == "30"
+    assert calculate("-3!") == "-6"
 
 
 def test_percent():
@@ -188,6 +221,7 @@ def test_square_root():
     assert calculate("sqrt(144)") == "12"
     assert calculate("√25") == "5"
     assert calculate("√(144)") == "12"
+    assert calculate("√25 + 4") == "9"
 
 
 def test_logarithms():
@@ -240,9 +274,13 @@ def test_trig_radians():
 def test_inverse_trig():
     assert calculate("asin(1)", "DEG") == "90"
     assert calculate("acos(1)", "DEG") == "0"
+    assert calculate("acos(0.5)", "DEG") == "60"
     assert calculate("atan(1)", "DEG") == "45"
 
     assert math.isclose(float(calculate("asin(1)", "RAD")), math.pi / 2, rel_tol=1e-11)
+    assert math.isclose(
+        float(calculate("acos(0.5)", "RAD")), math.pi / 3, rel_tol=1e-11
+    )
     assert math.isclose(float(calculate("atan(1)", "RAD")), math.pi / 4, rel_tol=1e-11)
 
 
@@ -250,10 +288,30 @@ def test_grad_angle_mode():
     assert calculate("sin(100)", "GRAD") == "1"
     assert calculate("cos(200)", "GRAD") == "-1"
     assert calculate("tan(50)", "GRAD") == "1"
+    assert calculate("asin(1)", "GRAD") == "100"
+    assert calculate("atan(1)", "GRAD") == "50"
 
 
 # ==========================================
-# 10. Error Handling & Specific Exception Types
+# 10. Numerical Formatting & Cleanup
+# ==========================================
+
+
+def test_number_formatting_edge_cases():
+    assert format_number(0.0) == "0"
+    assert format_number(-0.0) == "0"
+    assert format_number(5.0) == "5"
+    assert format_number(-5.0) == "-5"
+    assert format_number(0.1 + 0.2) == "0.3"
+    assert format_number(1.2345e-12) == "1.2345e-12"
+    assert format_number(1.23e16) == "1.23e16"
+    assert format_number(float("nan")) == "NaN"
+    assert format_number(float("inf")) == "Infinity"
+    assert format_number(float("-inf")) == "-Infinity"
+
+
+# ==========================================
+# 11. Error Handling & Specific Exception Types
 # ==========================================
 
 
@@ -265,10 +323,15 @@ def test_division_by_zero_error():
 
 
 def test_tan_singularity_domain_error():
-    res = evaluate_expression("tan(90)", angle_mode="DEG")
-    assert not res.success
-    assert isinstance(res.error, CalculatorDomainError)
-    assert "undefined" in res.formatted_value.lower()
+    res1 = evaluate_expression("tan(90)", angle_mode="DEG")
+    res2 = evaluate_expression("tan(270)", angle_mode="DEG")
+    res3 = evaluate_expression("tan(-90)", angle_mode="DEG")
+    res4 = evaluate_expression("tan(pi / 2)", angle_mode="RAD")
+
+    assert not res1.success and isinstance(res1.error, CalculatorDomainError)
+    assert not res2.success and isinstance(res2.error, CalculatorDomainError)
+    assert not res3.success and isinstance(res3.error, CalculatorDomainError)
+    assert not res4.success and isinstance(res4.error, CalculatorDomainError)
 
 
 def test_negative_square_root_domain_error():
@@ -282,6 +345,16 @@ def test_log_domain_error():
     res1 = evaluate_expression("log(0)")
     res2 = evaluate_expression("log(-5)")
     res3 = evaluate_expression("ln(0)")
+    assert not res1.success and isinstance(res1.error, CalculatorDomainError)
+    assert not res2.success and isinstance(res2.error, CalculatorDomainError)
+    assert not res3.success and isinstance(res3.error, CalculatorDomainError)
+
+
+def test_factorial_domain_error():
+    res1 = evaluate_expression("factorial(-1)")
+    res2 = evaluate_expression("factorial(2.5)")
+    res3 = evaluate_expression("(-3)!")
+
     assert not res1.success and isinstance(res1.error, CalculatorDomainError)
     assert not res2.success and isinstance(res2.error, CalculatorDomainError)
     assert not res3.success and isinstance(res3.error, CalculatorDomainError)
@@ -301,10 +374,36 @@ def test_invalid_syntax_error():
     assert not res5.success and isinstance(res5.error, CalculatorSyntaxError)
 
 
-def test_unknown_function_error():
-    res = evaluate_expression("unknownfunc(5)")
-    assert not res.success
-    assert isinstance(res.error, UnknownFunctionError)
+def test_function_argument_count_error():
+    res1 = evaluate_expression("sin()")
+    res2 = evaluate_expression("sin(90, 0)")
+    res3 = evaluate_expression("sqrt(9, 16)")
+
+    assert not res1.success and isinstance(res1.error, CalculatorSyntaxError)
+    assert not res2.success and isinstance(res2.error, CalculatorSyntaxError)
+    assert not res3.success and isinstance(res3.error, CalculatorSyntaxError)
+    assert "exactly one argument" in res2.formatted_value
+
+
+def test_malformed_number_error():
+    res1 = evaluate_expression("2..3")
+    res2 = evaluate_expression(".")
+    res3 = evaluate_expression("..")
+
+    assert not res1.success and isinstance(res1.error, InvalidNumberError)
+    assert not res2.success and isinstance(res2.error, InvalidNumberError)
+    assert not res3.success and isinstance(res3.error, InvalidNumberError)
+
+
+def test_unknown_function_and_constant_error():
+    res1 = evaluate_expression("unknownfunc(5)")
+    assert not res1.success and isinstance(res1.error, UnknownFunctionError)
+
+    # Isolated unknown identifier
+    res2 = evaluate_expression("some_var + 2")
+    assert not res2.success and (
+        isinstance(res2.error, (UnknownFunctionError, UnknownConstantError))
+    )
 
 
 def test_overflow_error():
@@ -315,7 +414,7 @@ def test_overflow_error():
 
 
 # ==========================================
-# 11. AST & Direct Evaluator Tests
+# 12. AST & Direct Evaluator Tests
 # ==========================================
 
 

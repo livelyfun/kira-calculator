@@ -121,7 +121,7 @@ class Parser:
 
     def parse_term(self) -> ASTNode:
         """Parse multiplication, division, and implicit multiplication."""
-        left = self.parse_power()
+        left = self.parse_unary()
 
         while True:
             token = self.current_token()
@@ -129,18 +129,18 @@ class Parser:
             # Explicit multiplication
             if token.type == TokenType.MULTIPLY:
                 self.consume(token.type)
-                right = self.parse_power()
+                right = self.parse_unary()
                 left = BinaryOpNode(op="*", left=left, right=right)
 
             # Explicit division
             elif token.type == TokenType.DIVIDE:
                 self.consume(token.type)
-                right = self.parse_power()
+                right = self.parse_unary()
                 left = BinaryOpNode(op="/", left=left, right=right)
 
             # Implicit multiplication (e.g. 2(3), 2pi, (2+3)(4+5), 2sin(30))
             elif self._can_start_implicit_multiplication(token):
-                right = self.parse_power()
+                right = self.parse_unary()
                 left = BinaryOpNode(op="*", left=left, right=right)
 
             else:
@@ -156,18 +156,6 @@ class Parser:
             TokenType.CONSTANT,
         )
 
-    def parse_power(self) -> ASTNode:
-        """Parse right-associative power operator: unary (^ power)?"""
-        left = self.parse_unary()
-
-        token = self.current_token()
-        if token.type == TokenType.POWER:
-            self.consume(TokenType.POWER)
-            right = self.parse_power()  # Right recursion for right-associativity
-            return BinaryOpNode(op="^", left=left, right=right)
-
-        return left
-
     def parse_unary(self) -> ASTNode:
         """Parse prefix unary operators (+ and -)."""
         token = self.current_token()
@@ -182,7 +170,20 @@ class Parser:
             operand = self.parse_unary()
             return UnaryOpNode(op="-", operand=operand)
 
-        return self.parse_postfix()
+        return self.parse_power()
+
+    def parse_power(self) -> ASTNode:
+        """Parse right-associative power operator: postfix (^ unary)?"""
+        left = self.parse_postfix()
+
+        token = self.current_token()
+        if token.type == TokenType.POWER:
+            self.consume(TokenType.POWER)
+            # Power is right-associative and exponent can have unary sign (e.g. 2^-2, 2^3^2)
+            right = self.parse_unary()
+            return BinaryOpNode(op="^", left=left, right=right)
+
+        return left
 
     def parse_postfix(self) -> ASTNode:
         """Parse postfix operators such as factorial (!) and percentage (%)."""

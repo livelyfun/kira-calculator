@@ -1,4 +1,4 @@
-from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
+from PySide6.QtWidgets import QButtonGroup, QHBoxLayout, QPushButton, QWidget
 
 
 class ModeBar(QWidget):
@@ -6,6 +6,11 @@ class ModeBar(QWidget):
         super().__init__()
 
         layout = QHBoxLayout(self)
+        layout.setContentsMargins(0, 0, 0, 0)
+        layout.setSpacing(8)
+
+        self.button_group = QButtonGroup(self)
+        self.button_group.setExclusive(True)
 
         self.calculator_button = QPushButton("Calculator")
         self.programmer_button = QPushButton("Programmer")
@@ -17,8 +22,9 @@ class ModeBar(QWidget):
             self.converter_button,
         ]
 
-        for button in buttons:
+        for i, button in enumerate(buttons):
             button.setCheckable(True)
+            self.button_group.addButton(button, i)
             layout.addWidget(button)
 
         self.calculator_button.setChecked(True)

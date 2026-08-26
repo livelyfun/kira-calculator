@@ -40,6 +40,7 @@ class CalculatorWindow(QMainWindow):
         self.create_ui()
 
         self.just_calculated = False
+        self.display_is_error = False
 
     def create_ui(self):
 
@@ -177,7 +178,7 @@ class CalculatorWindow(QMainWindow):
         key = event.key()
         text = event.text()
 
-        if text.isdigit() or text in ["+", "-", "."]:
+        if text.isdigit() or text in ["+", "-", ".", "^", "!", "(", ")"]:
             self.append_text(text)
 
         elif text == "*":
@@ -212,11 +213,26 @@ class CalculatorWindow(QMainWindow):
         else:
             self.append_text(text)
 
+    def _is_postfix_text(self, text):
+        """Check if text is a postfix-style operator that should append to existing value."""
+        return text.startswith("^") or text == "%" or text == "!"
+
     def append_text(self, text):
+        if self.display_is_error:
+            self.display.setText("0")
+            self.display_is_error = False
+            self.just_calculated = False
 
         current = self.display.text()
 
         operators = ["+", "-", "×", "÷"]
+
+        # Postfix-style operators (^2, ^, %, !) should always append to the current value
+        if self._is_postfix_text(text):
+            if self.just_calculated:
+                self.just_calculated = False
+            self.display.setText(current + text)
+            return
 
         # Start fresh after pressing =
         if self.just_calculated:
@@ -248,31 +264,16 @@ class CalculatorWindow(QMainWindow):
             self.display.setText(current + text)
 
     def clear_display(self):
-
         self.display.setText("0")
+        self.just_calculated = False
+        self.display_is_error = False
 
     def backspace(self):
-
         current = self.display.text()
 
-        # If the display currently holds an error message, clear to 0
-        if (
-            current in ("Error", "NaN", "Infinity", "-Infinity")
-            or not current
-            or len(current) == 1
-            or any(
-                err_word in current.lower()
-                for err_word in (
-                    "error",
-                    "invalid",
-                    "division",
-                    "unexpected",
-                    "undefined",
-                    "expected",
-                )
-            )
-        ):
+        if self.display_is_error or not current or len(current) == 1:
             self.display.setText("0")
+            self.display_is_error = False
             return
 
         self.display.setText(current[:-1])
@@ -285,9 +286,11 @@ class CalculatorWindow(QMainWindow):
             self.history.insertItem(0, f"{expression} = {result_obj.formatted_value}")
             self.display.setText(result_obj.formatted_value)
             self.just_calculated = True
+            self.display_is_error = False
         else:
             self.display.setText(result_obj.formatted_value)
             self.just_calculated = False
+            self.display_is_error = True
 
     def restore_history(self, item):
 
@@ -298,6 +301,7 @@ class CalculatorWindow(QMainWindow):
         self.display.setText(expression)
 
         self.just_calculated = False
+        self.display_is_error = False
 
     def scientific_button_clicked(self, text):
 

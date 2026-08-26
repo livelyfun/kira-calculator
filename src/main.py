@@ -11,15 +11,13 @@ from PySide6.QtWidgets import QApplication  # noqa: E402
 from ui.window import CalculatorWindow  # noqa: E402
 
 
-def main():
-
+def main() -> None:
     app = QApplication(sys.argv)
 
     style_path = Path(__file__).parent / "styles" / "main.qss"
 
     if style_path.exists():
-        with open(style_path) as file:
-            app.setStyleSheet(file.read())
+        app.setStyleSheet(style_path.read_text(encoding="utf-8"))
 
     window = CalculatorWindow()
     window.show()

@@ -140,8 +140,10 @@ class Evaluator:
         raise CalculatorSyntaxError(f"Unsupported postfix operator '{node.op}'")
 
     def _eval_function(self, node: FunctionCallNode) -> float:
-        if not node.args:
-            raise CalculatorSyntaxError(f"Function '{node.name}' requires arguments")
+        if len(node.args) != 1:
+            raise CalculatorSyntaxError(
+                f"Function '{node.name}' requires exactly one argument"
+            )
 
         evaluated_args = [self.evaluate(arg) for arg in node.args]
         arg = evaluated_args[0]
