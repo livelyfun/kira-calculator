@@ -8,7 +8,6 @@ from PySide6.QtWidgets import (
 
 
 class CalculatorPage(QWidget):
-
     def __init__(self):
         super().__init__()
 
@@ -27,10 +26,12 @@ class CalculatorPage(QWidget):
         self.angle_selector = QComboBox()
         self.angle_selector.setObjectName("angleSelector")
 
-        self.angle_selector.addItems([
-            "DEG",
-            "RAD",
-        ])
+        self.angle_selector.addItems(
+            [
+                "DEG",
+                "RAD",
+            ]
+        )
 
         self.angle_selector.setCurrentText("DEG")
 
@@ -47,13 +48,11 @@ class CalculatorPage(QWidget):
             ("tan", 0, 2),
             ("log", 0, 3),
             ("ln", 0, 4),
-
             ("√", 1, 0),
             ("π", 1, 1),
             ("e", 1, 2),
             ("x²", 1, 3),
             ("xʸ", 1, 4),
-
             ("(", 2, 0),
             (")", 2, 1),
             ("%", 2, 2),
@@ -62,7 +61,6 @@ class CalculatorPage(QWidget):
         ]
 
         for text, row, column in buttons:
-
             button = QPushButton(text)
             button.setObjectName("scientificButton")
 
@@ -86,28 +84,23 @@ class CalculatorPage(QWidget):
             ("⌫", 0, 1),
             ("÷", 0, 2),
             ("×", 0, 3),
-
             ("7", 1, 0),
             ("8", 1, 1),
             ("9", 1, 2),
             ("-", 1, 3),
-
             ("4", 2, 0),
             ("5", 2, 1),
             ("6", 2, 2),
             ("+", 2, 3),
-
             ("1", 3, 0),
             ("2", 3, 1),
             ("3", 3, 2),
             ("=", 3, 3),
-
             ("0", 4, 0),
             (".", 4, 2),
         ]
 
         for text, row, column in buttons:
-
             button = QPushButton(text)
 
             self.buttons[text] = button

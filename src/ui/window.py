@@ -12,11 +12,18 @@ from PySide6.QtWidgets import (
     QWidget,
 )
 
-from calculator.logic import calculate
-from widgets.calculator_page import CalculatorPage
-from widgets.converter_page import ConverterPage
-from widgets.mode_bar import ModeBar
-from widgets.programmer_page import ProgrammerPage
+try:
+    from calculator.logic import evaluate_expression
+    from widgets.calculator_page import CalculatorPage
+    from widgets.converter_page import ConverterPage
+    from widgets.mode_bar import ModeBar
+    from widgets.programmer_page import ProgrammerPage
+except ImportError:
+    from src.calculator.logic import evaluate_expression
+    from src.widgets.calculator_page import CalculatorPage
+    from src.widgets.converter_page import ConverterPage
+    from src.widgets.mode_bar import ModeBar
+    from src.widgets.programmer_page import ProgrammerPage
 
 
 class CalculatorWindow(QMainWindow):
@@ -59,37 +66,34 @@ class CalculatorWindow(QMainWindow):
 
         self.calculator_page = CalculatorPage()
         self.calculator_page.angle_selector.currentTextChanged.connect(
-             self.angle_mode_changed
+            self.angle_mode_changed
         )
         for text, button in self.calculator_page.buttons.items():
-       
-           if text in [
-               "sin",
-               "cos",
-               "tan",
-               "log",
-               "ln",
-               "√",
-               "π",
-               "e",
-               "x²",
-               "xʸ",
-               "%",
-               "±",
-               "1/x",
-               "(",
-               ")",
-           ]:
-       
-               button.clicked.connect(
-                   lambda checked=False, t=text: self.scientific_button_clicked(t)
-               )
-       
-           else:
-           
-               button.clicked.connect(
-                   lambda checked=False, t=text: self.button_clicked(t)
-               )       
+            if text in [
+                "sin",
+                "cos",
+                "tan",
+                "log",
+                "ln",
+                "√",
+                "π",
+                "e",
+                "x²",
+                "xʸ",
+                "%",
+                "±",
+                "1/x",
+                "(",
+                ")",
+            ]:
+                button.clicked.connect(
+                    lambda checked=False, t=text: self.scientific_button_clicked(t)
+                )
+
+            else:
+                button.clicked.connect(
+                    lambda checked=False, t=text: self.button_clicked(t)
+                )
         self.programmer_page = ProgrammerPage()
         self.converter_page = ConverterPage()
 
@@ -103,11 +107,11 @@ class CalculatorWindow(QMainWindow):
         self.mode_bar.calculator_button.clicked.connect(
             lambda: self.stack.setCurrentIndex(0)
         )
-        
+
         self.mode_bar.programmer_button.clicked.connect(
             lambda: self.stack.setCurrentIndex(1)
         )
-        
+
         self.mode_bar.converter_button.clicked.connect(
             lambda: self.stack.setCurrentIndex(2)
         )
@@ -167,8 +171,6 @@ class CalculatorWindow(QMainWindow):
         self.history_layout.addWidget(title)
         self.history_layout.addWidget(self.history)
         self.history_layout.addWidget(clear_button)
-
- 
 
     def keyPressEvent(self, event: QKeyEvent):
 
@@ -253,32 +255,39 @@ class CalculatorWindow(QMainWindow):
 
         current = self.display.text()
 
-        if current == "Error":
-            self.display.setText("0")
-            return
-
-        if len(current) == 1:
+        # If the display currently holds an error message, clear to 0
+        if (
+            current in ("Error", "NaN", "Infinity", "-Infinity")
+            or not current
+            or len(current) == 1
+            or any(
+                err_word in current.lower()
+                for err_word in (
+                    "error",
+                    "invalid",
+                    "division",
+                    "unexpected",
+                    "undefined",
+                    "expected",
+                )
+            )
+        ):
             self.display.setText("0")
             return
 
         self.display.setText(current[:-1])
 
     def calculate_result(self):
-
         expression = self.display.text()
+        result_obj = evaluate_expression(expression, angle_mode=self.angle_mode)
 
-        result = calculate(
-            expression,
-            angle_mode=self.angle_mode,
-        )
-
-        if result != "Error":
-            self.history.insertItem(0, f"{expression} = {result}")
-
-        self.display.setText(result)
-
-        if result != "Error":
+        if result_obj.success:
+            self.history.insertItem(0, f"{expression} = {result_obj.formatted_value}")
+            self.display.setText(result_obj.formatted_value)
             self.just_calculated = True
+        else:
+            self.display.setText(result_obj.formatted_value)
+            self.just_calculated = False
 
     def restore_history(self, item):
 
@@ -329,7 +338,6 @@ class CalculatorWindow(QMainWindow):
             self.append_text("%")
 
         elif text == "±":
-
             current = self.display.text()
 
             if current.startswith("-"):
@@ -345,4 +353,4 @@ class CalculatorWindow(QMainWindow):
 
     def angle_mode_changed(self, mode):
 
-        self.angle_mode = mode        
+        self.angle_mode = mode

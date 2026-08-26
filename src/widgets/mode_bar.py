@@ -2,7 +2,6 @@ from PySide6.QtWidgets import QHBoxLayout, QPushButton, QWidget
 
 
 class ModeBar(QWidget):
-
     def __init__(self):
         super().__init__()
 

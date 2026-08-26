@@ -1,302 +1,280 @@
-import math
+"""Recursive-descent Parser for mathematical expressions generating an AST."""
 
-from .tokenizer import Token
+from .ast_nodes import (
+    ASTNode,
+    BinaryOpNode,
+    ConstantNode,
+    FunctionCallNode,
+    NumberNode,
+    PostfixOpNode,
+    UnaryOpNode,
+)
+from .errors import CalculatorSyntaxError
+from .tokenizer import Token, TokenType
 
 
 class Parser:
+    """Parses a sequence of Tokens into an Abstract Syntax Tree (AST)."""
 
-    def __init__(self, tokens, angle_mode="DEG"):
+    MAX_DEPTH = 200
+
+    def __init__(self, tokens: list[Token]):
         self.tokens = tokens
         self.position = 0
-        self.angle_mode = angle_mode
+        self._depth = 0
 
-    def parse(self):
-        if not self.tokens:
-            raise ValueError("Empty expression")
+    def parse(self) -> ASTNode:
+        """Parse all tokens into an AST root node.
 
-        result = self.parse_expression()
+        Raises:
+            CalculatorSyntaxError: If the expression has invalid syntax or is empty.
+        """
+        if not self.tokens or (
+            len(self.tokens) == 1 and self.tokens[0].type == TokenType.EOF
+        ):
+            raise CalculatorSyntaxError("Empty expression")
 
-        if self.position < len(self.tokens):
-            token = self.current_token()
+        root = self.parse_expression()
 
-            raise ValueError(
-                f"Unexpected token: {token.value}"
+        current = self.current_token()
+        if current.type != TokenType.EOF:
+            if current.type == TokenType.RPAREN:
+                raise CalculatorSyntaxError(
+                    "Unexpected closing parenthesis ')'", position=current.position
+                )
+            raise CalculatorSyntaxError(
+                f"Unexpected token '{current.value}'", position=current.position
             )
 
-        return result
+        return root
 
     # ==========================================
-    # Token helpers
+    # Token Navigation Helpers
     # ==========================================
 
-    def current_token(self):
-        if self.position >= len(self.tokens):
-            return None
+    def current_token(self) -> Token:
+        if self.position < len(self.tokens):
+            return self.tokens[self.position]
+        return self.tokens[-1]
 
-        return self.tokens[self.position]
+    def peek_token(self, offset: int = 1) -> Token:
+        idx = self.position + offset
+        if idx < len(self.tokens):
+            return self.tokens[idx]
+        return self.tokens[-1]
 
-    def consume(self, token_type=None):
-
+    def consume(self, expected_type: TokenType | None = None) -> Token:
         token = self.current_token()
 
-        if token is None:
-            raise ValueError("Unexpected end of expression")
+        if token.type == TokenType.EOF:
+            if expected_type == TokenType.RPAREN:
+                raise CalculatorSyntaxError(
+                    "Missing closing parenthesis ')'", position=token.position
+                )
+            raise CalculatorSyntaxError(
+                "Unexpected end of expression", position=token.position
+            )
 
-        if token_type is not None and token.type != token_type:
-            raise ValueError(
-                f"Expected {token_type}, got {token.type}"
+        if expected_type is not None and token.type != expected_type:
+            if expected_type == TokenType.RPAREN:
+                raise CalculatorSyntaxError(
+                    f"Expected closing parenthesis ')', got '{token.value}'",
+                    position=token.position,
+                )
+            raise CalculatorSyntaxError(
+                f"Expected {expected_type.name}, got '{token.value}'",
+                position=token.position,
             )
 
         self.position += 1
-
         return token
 
     # ==========================================
-    # Expression
+    # Grammar Hierarchy
     # ==========================================
 
-    def parse_expression(self):
+    def parse_expression(self) -> ASTNode:
+        """Parse binary addition and subtraction: term ((+ | -) term)*"""
+        self._depth += 1
+        if self._depth > self.MAX_DEPTH:
+            raise CalculatorSyntaxError("Expression exceeds maximum nesting depth")
 
-        result = self.parse_term()
+        try:
+            left = self.parse_term()
+
+            while True:
+                token = self.current_token()
+                if token.type == TokenType.PLUS:
+                    self.consume(TokenType.PLUS)
+                    right = self.parse_term()
+                    left = BinaryOpNode(op="+", left=left, right=right)
+                elif token.type == TokenType.MINUS:
+                    self.consume(TokenType.MINUS)
+                    right = self.parse_term()
+                    left = BinaryOpNode(op="-", left=left, right=right)
+                else:
+                    break
+
+            return left
+        finally:
+            self._depth -= 1
+
+    def parse_term(self) -> ASTNode:
+        """Parse multiplication, division, and implicit multiplication."""
+        left = self.parse_power()
 
         while True:
-
             token = self.current_token()
 
-            if token is None:
-                break
+            # Explicit multiplication
+            if token.type == TokenType.MULTIPLY:
+                self.consume(token.type)
+                right = self.parse_power()
+                left = BinaryOpNode(op="*", left=left, right=right)
 
-            if token.type == "PLUS":
-                self.consume()
-                result += self.parse_term()
+            # Explicit division
+            elif token.type == TokenType.DIVIDE:
+                self.consume(token.type)
+                right = self.parse_power()
+                left = BinaryOpNode(op="/", left=left, right=right)
 
-            elif token.type == "MINUS":
-                self.consume()
-                result -= self.parse_term()
+            # Implicit multiplication (e.g. 2(3), 2pi, (2+3)(4+5), 2sin(30))
+            elif self._can_start_implicit_multiplication(token):
+                right = self.parse_power()
+                left = BinaryOpNode(op="*", left=left, right=right)
 
             else:
                 break
 
-        return result
+        return left
 
-    # ==========================================
-    # Multiplication / Division
-    # ==========================================
+    def _can_start_implicit_multiplication(self, token: Token) -> bool:
+        """Check if current token can trigger implicit multiplication."""
+        return token.type in (
+            TokenType.LPAREN,
+            TokenType.FUNCTION,
+            TokenType.CONSTANT,
+        )
 
-    def parse_term(self):
-
-        result = self.parse_power()
-
-        while True:
-
-            token = self.current_token()
-
-            if token is None:
-                break
-
-            if token.type == "MULTIPLY":
-                self.consume()
-                result *= self.parse_power()
-
-            elif token.type == "DIVIDE":
-                self.consume()
-
-                divisor = self.parse_power()
-
-                if divisor == 0:
-                    raise ZeroDivisionError(
-                        "Division by zero"
-                    )
-
-                result /= divisor
-
-            else:
-                break
-
-        return result
-
-    # ==========================================
-    # Powers
-    # ==========================================
-
-    def parse_power(self):
-
-        result = self.parse_unary()
+    def parse_power(self) -> ASTNode:
+        """Parse right-associative power operator: unary (^ power)?"""
+        left = self.parse_unary()
 
         token = self.current_token()
+        if token.type == TokenType.POWER:
+            self.consume(TokenType.POWER)
+            right = self.parse_power()  # Right recursion for right-associativity
+            return BinaryOpNode(op="^", left=left, right=right)
 
-        if token is not None and token.type == "POWER":
+        return left
 
-            self.consume()
-
-            exponent = self.parse_power()
-
-            result = result ** exponent
-
-        return result
-
-    # ==========================================
-    # Unary + / -
-    # ==========================================
-
-    def parse_unary(self):
-
+    def parse_unary(self) -> ASTNode:
+        """Parse prefix unary operators (+ and -)."""
         token = self.current_token()
 
-        if token is not None:
+        if token.type == TokenType.PLUS:
+            self.consume(TokenType.PLUS)
+            operand = self.parse_unary()
+            return UnaryOpNode(op="+", operand=operand)
 
-            if token.type == "PLUS":
-                self.consume()
-                return self.parse_unary()
-
-            if token.type == "MINUS":
-                self.consume()
-                return -self.parse_unary()
+        if token.type == TokenType.MINUS:
+            self.consume(TokenType.MINUS)
+            operand = self.parse_unary()
+            return UnaryOpNode(op="-", operand=operand)
 
         return self.parse_postfix()
 
-    # ==========================================
-    # Percentage
-    # ==========================================
-
-    def parse_postfix(self):
-
-        result = self.parse_primary()
+    def parse_postfix(self) -> ASTNode:
+        """Parse postfix operators such as factorial (!) and percentage (%)."""
+        node = self.parse_primary()
 
         while True:
-
             token = self.current_token()
-
-            if token is None:
-                break
-
-            if token.type == "PERCENT":
-
-                self.consume()
-
-                result /= 100
-
+            if token.type == TokenType.FACTORIAL:
+                self.consume(TokenType.FACTORIAL)
+                node = PostfixOpNode(op="!", operand=node)
+            elif token.type == TokenType.PERCENT:
+                self.consume(TokenType.PERCENT)
+                node = PostfixOpNode(op="%", operand=node)
             else:
                 break
 
-        return result
+        return node
 
-    # ==========================================
-    # Numbers / functions / constants /
-    # parentheses
-    # ==========================================
-
-    def parse_primary(self):
-
+    def parse_primary(self) -> ASTNode:
+        """Parse primary expressions: numbers, constants, function calls, and parenthesized expressions."""
         token = self.current_token()
 
-        if token is None:
-            raise ValueError(
-                "Expected expression"
+        # 1. Number literal
+        if token.type == TokenType.NUMBER:
+            self.consume(TokenType.NUMBER)
+            return NumberNode(value=float(token.value))
+
+        # 2. Constant literal (pi, e, phi)
+        if token.type == TokenType.CONSTANT:
+            self.consume(TokenType.CONSTANT)
+            return ConstantNode(name=token.value)
+
+        # 3. Function call (e.g. sin(90), log(10), sqrt(25))
+        if token.type == TokenType.FUNCTION:
+            fn_token = self.consume(TokenType.FUNCTION)
+            fn_name = fn_token.value
+
+            # If function is followed by parentheses: fn(arg1, arg2, ...)
+            if self.current_token().type == TokenType.LPAREN:
+                self.consume(TokenType.LPAREN)
+
+                # Check for empty arguments: fn()
+                if self.current_token().type == TokenType.RPAREN:
+                    raise CalculatorSyntaxError(
+                        f"Function '{fn_name}' requires arguments",
+                        position=fn_token.position,
+                    )
+
+                args: list[ASTNode] = [self.parse_expression()]
+
+                while self.current_token().type == TokenType.COMMA:
+                    self.consume(TokenType.COMMA)
+                    args.append(self.parse_expression())
+
+                self.consume(TokenType.RPAREN)
+                return FunctionCallNode(name=fn_name, args=args)
+
+            # Allow prefix syntax for sqrt e.g. √25 -> sqrt(25)
+            if fn_name == "sqrt":
+                arg = self.parse_power()
+                return FunctionCallNode(name="sqrt", args=[arg])
+
+            raise CalculatorSyntaxError(
+                f"Expected '(' after function '{fn_name}'",
+                position=fn_token.position,
             )
 
-        # Number
-        if token.type == "NUMBER":
+        # 4. Parenthesized expression: (expr)
+        if token.type == TokenType.LPAREN:
+            self.consume(TokenType.LPAREN)
 
-            self.consume()
+            if self.current_token().type == TokenType.RPAREN:
+                raise CalculatorSyntaxError(
+                    "Empty parentheses '()'",
+                    position=token.position,
+                )
 
-            return float(token.value)
+            expr = self.parse_expression()
+            self.consume(TokenType.RPAREN)
+            return expr
 
-        # Constant
-        if token.type == "CONSTANT":
-
-            self.consume()
-
-            if token.value == "pi":
-                return math.pi
-
-            if token.value == "e":
-                return math.e
-
-            raise ValueError(
-                f"Unknown constant: {token.value}"
+        # 5. Unexpected token or end of input
+        if token.type == TokenType.EOF:
+            raise CalculatorSyntaxError(
+                "Unexpected end of expression", position=token.position
             )
 
-        # Function
-        if token.type == "FUNCTION":
-
-            function_name = self.consume().value
-
-            self.consume("LPAREN")
-
-            argument = self.parse_expression()
-
-            self.consume("RPAREN")
-
-            return self.apply_function(
-                function_name,
-                argument,
+        if token.type == TokenType.RPAREN:
+            raise CalculatorSyntaxError(
+                "Unexpected closing parenthesis ')'", position=token.position
             )
 
-        # Parentheses
-        if token.type == "LPAREN":
-
-            self.consume()
-
-            result = self.parse_expression()
-
-            self.consume("RPAREN")
-
-            return result
-
-        raise ValueError(
-            f"Unexpected token: {token.value}"
-        )
-
-    # ==========================================
-    # Scientific functions
-    # ==========================================
-
-    def apply_function(self, name, value):
-
-        if name in {"sin", "cos", "tan"}:
-
-            angle = value
-
-            if self.angle_mode == "DEG":
-                angle = math.radians(angle)
-
-            if name == "sin":
-                return math.sin(angle)
-
-            if name == "cos":
-                return math.cos(angle)
-
-            if name == "tan":
-                return math.tan(angle)
-
-        if name == "sqrt":
-
-            if value < 0:
-                raise ValueError(
-                    "Square root of negative number"
-                )
-
-            return math.sqrt(value)
-
-        if name == "log":
-
-            if value <= 0:
-                raise ValueError(
-                    "Logarithm domain error"
-                )
-
-            return math.log10(value)
-
-        if name == "ln":
-
-            if value <= 0:
-                raise ValueError(
-                    "Natural logarithm domain error"
-                )
-
-            return math.log(value)
-
-        raise ValueError(
-            f"Unknown function: {name}"
+        raise CalculatorSyntaxError(
+            f"Unexpected token '{token.value}'", position=token.position
         )
