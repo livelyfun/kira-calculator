@@ -1,0 +1,11 @@
+# Runtime
+PySide6>=6.6
+asteval>=0.9.31
+
+# Development (optional)
+# pytest>=7.0
+# pytest-qt>=4.2
+# ruff>=0.4
+
+# Packaging (optional)
+# pyinstaller>=6.0

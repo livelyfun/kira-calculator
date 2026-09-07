@@ -1,47 +1,95 @@
 # Kira Calculator 🧮
 
-A scientific calculator and expression engine built with **Python** and **PySide6**.
+A modern, **safe**, cross-platform scientific calculator built with **Python** and **PySide6**.
 
-> This repo currently has no description, and `README.md`/`requirements.txt` are empty — this README is based on the folder structure and my portfolio notes. Fill in the ⚠️ placeholders with the real details.
+![Python](https://img.shields.io/badge/Python-3.10%2B-blue)
+![PySide6](https://img.shields.io/badge/PySide6-6.6%2B-green)
+![License](https://img.shields.io/badge/License-MIT-yellow)
 
 ## ✨ Features
 
-- Scientific calculator functions (arithmetic, and whatever operators/functions the expression engine supports — ⚠️ list them here)
-- Custom expression parsing/evaluation engine
-- Desktop GUI built with PySide6
+- Scientific calculator (sin, cos, tan, log, ln, √, π, e, powers, …)
+- Safe expression engine – **never uses bare `eval()`**
+- Clean dark UI with history panel
+- Keyboard support
+- Mode switcher (Calculator / Programmer / Converter – last two are scaffolds)
+- Persistent history (`~/.kira_calculator/history.json`)
+- Works on **Windows, macOS and Linux**
+- Proper packaging (installable package + PyInstaller builds)
 
-## 📁 Project Structure
+## 🚀 Quick Start
 
-```
-kira-calculator/
-├── assets/     # icons, images, or other static resources
-├── docs/       # project documentation
-├── scripts/    # helper/build scripts
-├── src/        # application source code
-├── tests/      # test suite
-├── requirements.txt
-└── LICENSE
-```
-
-## 🚀 Getting Started
+### From source (recommended for development)
 
 ```bash
 git clone https://github.com/livelyfun/kira-calculator.git
 cd kira-calculator
-pip install -r requirements.txt
-python src/main.py   # ⚠️ replace with the actual entry point
+
+python -m venv .venv
+# Windows
+.venv\Scripts\activate
+# macOS / Linux
+source .venv/bin/activate
+
+pip install -e .
+kira-calculator
+# or
+python -m kira_calculator
 ```
 
-## 🧪 Running Tests
+### Dependencies only
 
 ```bash
-pytest tests/
+pip install -r requirements.txt
+PYTHONPATH=src python -m kira_calculator
 ```
 
-## 📄 License
+## 🧪 Tests
 
-This project is licensed under the terms of the [LICENSE](./LICENSE) file in this repo.
+```bash
+pip install -e ".[dev]"
+pytest
+```
+
+## 📦 Packaging into a standalone app
+
+```bash
+pip install -e ".[packaging]"
+python scripts/build_app.py            # folder build
+python scripts/build_app.py --onefile  # single executable
+```
+
+See [docs/packaging.md](docs/packaging.md) for platform-specific notes.
+
+## 🏗️ Project Structure
+
+```
+kira-calculator/
+├── src/kira_calculator/     # main package
+│   ├── core/                # safe engine, parser, history
+│   ├── ui/                  # windows, pages, themes
+│   └── app.py
+├── tests/
+├── docs/
+├── scripts/build_app.py
+├── assets/icons/
+├── pyproject.toml
+└── requirements.txt
+```
+
+## 📖 Documentation
+
+- [Architecture](docs/architecture.md)
+- [Packaging](docs/packaging.md)
+
+## 🛡️ Safety
+
+The expression engine uses **asteval** with a restricted symbol table. Dangerous operations (`open`, `exec`, `import`, …) are unavailable.
 
 ## 👤 Author
 
 [Mithlesh Das](https://github.com/livelyfun) — BIT undergraduate and aspiring backend & full-stack developer based in Biratnagar, Nepal.
+
+## 📄 License
+
+MIT – see [LICENSE](LICENSE).

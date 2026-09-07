@@ -1,0 +1,65 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kira-calculator"
+version = "1.0.0"
+description = "A modern, safe, cross-platform scientific calculator built with Python and PySide6."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Mithlesh Das", email = "livelyfun@users.noreply.github.com" }
+]
+keywords = ["calculator", "scientific", "pyside6", "qt", "desktop"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: X11 Applications :: Qt",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Desktop Environment",
+]
+dependencies = [
+    "PySide6>=6.6",
+    "asteval>=0.9.31",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-qt>=4.2",
+    "ruff>=0.4",
+]
+packaging = [
+    "pyinstaller>=6.0",
+]
+
+[project.scripts]
+kira-calculator = "kira_calculator.app:main"
+
+[project.urls]
+Homepage = "https://github.com/livelyfun/kira-calculator"
+Repository = "https://github.com/livelyfun/kira-calculator"
+Issues = "https://github.com/livelyfun/kira-calculator/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+kira_calculator = ["ui/themes/*.qss", "resources/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
