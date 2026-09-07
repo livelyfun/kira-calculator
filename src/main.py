@@ -1,14 +1,15 @@
 import sys
 from pathlib import Path
 
-# Ensure src directory is in sys.path when running main.py directly
+# Ensure the project package is importable when running main.py directly.
 src_dir = Path(__file__).resolve().parent
-if str(src_dir) not in sys.path:
-    sys.path.insert(0, str(src_dir))
+project_root = src_dir.parent
+if str(project_root) not in sys.path:
+    sys.path.insert(0, str(project_root))
 
 from PySide6.QtWidgets import QApplication  # noqa: E402
 
-from ui.window import CalculatorWindow  # noqa: E402
+from src.ui.window import CalculatorWindow  # noqa: E402
 
 
 def main() -> None:

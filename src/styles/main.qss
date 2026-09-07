@@ -28,6 +28,34 @@ QLabel {
     padding: 20px;
 }
 
+/* ==========================================
+   Mode Navigation
+========================================== */
+
+QPushButton#modeButton {
+    background-color: #3b3b3b;
+    color: white;
+    border: none;
+    border-radius: 9px;
+    font-size: 15px;
+    font-weight: 600;
+    min-height: 42px;
+    padding: 0 12px;
+}
+
+QPushButton#modeButton:hover {
+    background-color: #505050;
+}
+
+QPushButton#modeButton:checked {
+    background-color: #1f6feb;
+    border: 2px solid #6da8ff;
+}
+
+QPushButton#modeButton:pressed {
+    background-color: #0d419d;
+}
+
 
 /* ==========================================
    Scientific Buttons
@@ -386,6 +414,23 @@ QPushButton#programmerButton:hover {
 
 QPushButton#programmerButton:pressed {
     background-color: #4A3C74;
+}
+
+QLabel#converterTitle {
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    padding: 0;
+}
+
+QLabel#converterDescription {
+    background-color: transparent;
+    border: none;
+    color: #c5c5c5;
+    font-size: 16px;
+    padding: 0;
 }
 
 QLabel#programmerBIN,

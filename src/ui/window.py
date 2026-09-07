@@ -1,3 +1,5 @@
+"""Application shell coordinating navigation, pages, and shared expression UI."""
+
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QKeyEvent
 from PySide6.QtWidgets import (
@@ -13,160 +15,144 @@ from PySide6.QtWidgets import (
 )
 
 try:
-    from calculator.logic import evaluate_expression
-    from widgets.calculator_page import CalculatorPage
-    from widgets.converter_page import ConverterPage
-    from widgets.mode_bar import ModeBar
-    from widgets.programmer_page import ProgrammerPage
-except ImportError:
     from src.calculator.logic import evaluate_expression
+    from src.ui.modes import AppMode
     from src.widgets.calculator_page import CalculatorPage
     from src.widgets.converter_page import ConverterPage
     from src.widgets.mode_bar import ModeBar
     from src.widgets.programmer_page import ProgrammerPage
+    from src.widgets.scientific_page import ScientificPage
+except ImportError:
+    from calculator.logic import evaluate_expression
+    from ui.modes import AppMode
+    from widgets.calculator_page import CalculatorPage
+    from widgets.converter_page import ConverterPage
+    from widgets.mode_bar import ModeBar
+    from widgets.programmer_page import ProgrammerPage
+    from widgets.scientific_page import ScientificPage
 
 
 class CalculatorWindow(QMainWindow):
-    def __init__(self):
-        super().__init__()
+    """Coordinate top-level modes and the shared Standard/Scientific state."""
 
+    def __init__(self) -> None:
+        super().__init__()
         self.setWindowTitle("Kira Calculator")
         self.resize(820, 700)
         self.setMinimumSize(800, 620)
         self.setMaximumSize(900, 800)
 
-        self.angle_mode = "DEG"
-
-        self.create_ui()
-
         self.just_calculated = False
         self.display_is_error = False
+        self.active_mode = AppMode.STANDARD
+        self.pages: dict[AppMode, QWidget] = {}
 
-    def create_ui(self):
+        self.create_ui()
+        self.set_mode(AppMode.STANDARD)
 
+    def create_ui(self) -> None:
         central_widget = QWidget()
         self.setCentralWidget(central_widget)
 
-        self.main_layout = QHBoxLayout()
+        self.main_layout = QHBoxLayout(central_widget)
         self.main_layout.setSpacing(15)
         self.main_layout.setContentsMargins(15, 15, 15, 15)
-
-        central_widget.setLayout(self.main_layout)
-
-        # ==========================
-        # Left Side (Calculator)
-        # ==========================
 
         self.calculator_layout = QVBoxLayout()
         self.calculator_layout.setSpacing(15)
 
         self.create_display()
         self.mode_bar = ModeBar()
+        self.mode_bar.mode_selected.connect(self.set_mode)
         self.calculator_layout.addWidget(self.mode_bar)
+
         self.stack = QStackedWidget()
-
-        self.calculator_page = CalculatorPage()
-        self.calculator_page.angle_selector.currentTextChanged.connect(
-            self.angle_mode_changed
-        )
-        for text, button in self.calculator_page.buttons.items():
-            if text in [
-                "sin",
-                "cos",
-                "tan",
-                "log",
-                "ln",
-                "√",
-                "π",
-                "e",
-                "x²",
-                "xʸ",
-                "%",
-                "±",
-                "1/x",
-                "(",
-                ")",
-            ]:
-                button.clicked.connect(
-                    lambda checked=False, t=text: self.scientific_button_clicked(t)
-                )
-
-            else:
-                button.clicked.connect(
-                    lambda checked=False, t=text: self.button_clicked(t)
-                )
-        self.programmer_page = ProgrammerPage()
-        self.converter_page = ConverterPage()
-
-        self.stack.addWidget(self.calculator_page)
-
-        self.stack.addWidget(self.programmer_page)
-        self.stack.addWidget(self.converter_page)
-
+        self._create_pages()
         self.calculator_layout.addWidget(self.stack)
-
-        self.mode_bar.calculator_button.clicked.connect(self.show_calculator_mode)
-        self.mode_bar.programmer_button.clicked.connect(self.show_programmer_mode)
-        self.mode_bar.converter_button.clicked.connect(self.show_converter_mode)
 
         calculator_widget = QWidget()
         calculator_widget.setLayout(self.calculator_layout)
         calculator_widget.setMinimumWidth(500)
-
         self.main_layout.addWidget(calculator_widget, 5)
-
-        # ==========================
-        # Right Side (History)
-        # ==========================
 
         self.history_layout = QVBoxLayout()
         self.history_layout.setSpacing(10)
-
         self.create_history()
 
-        history_widget = QWidget()
-        history_widget.setLayout(self.history_layout)
-        history_widget.setMinimumWidth(240)
+        self.history_widget = QWidget()
+        self.history_widget.setLayout(self.history_layout)
+        self.history_widget.setMinimumWidth(240)
+        self.main_layout.addWidget(self.history_widget, 2)
 
-        self.main_layout.addWidget(history_widget, 2)
+    def _create_pages(self) -> None:
+        self.calculator_page = CalculatorPage()
+        self.scientific_page = ScientificPage()
+        self.programmer_page = ProgrammerPage()
+        self.converter_page = ConverterPage()
+        self.pages = {
+            AppMode.STANDARD: self.calculator_page,
+            AppMode.SCIENTIFIC: self.scientific_page,
+            AppMode.PROGRAMMER: self.programmer_page,
+            AppMode.CONVERTER: self.converter_page,
+        }
+        for page in self.pages.values():
+            self.stack.addWidget(page)
 
-    def show_calculator_mode(self) -> None:
-        self.stack.setCurrentIndex(0)
-        self.display.show()
+        self._connect_expression_page(self.calculator_page)
+        self._connect_expression_page(self.scientific_page, scientific=True)
+
+    def _connect_expression_page(
+        self, page: CalculatorPage, *, scientific: bool = False
+    ) -> None:
+        handler = self.scientific_button_clicked if scientific else self.button_clicked
+        for text, button in page.buttons.items():
+            button.clicked.connect(
+                lambda checked=False, value=text, click_handler=handler: click_handler(
+                    value
+                )
+            )
+
+    def set_mode(self, mode: AppMode) -> None:
+        """Show a page by stable mode identifier rather than a stack index."""
+        if not isinstance(mode, AppMode):
+            mode = AppMode(mode)
+        self.active_mode = mode
+        self.stack.setCurrentWidget(self.pages[mode])
+        self.mode_bar.set_active_mode(mode)
+
+        uses_expression_model = mode.uses_expression_model
+        self.display.setVisible(uses_expression_model)
+        self.history_widget.setVisible(uses_expression_model)
+
+    def show_standard_mode(self) -> None:
+        self.set_mode(AppMode.STANDARD)
+
+    def show_scientific_mode(self) -> None:
+        self.set_mode(AppMode.SCIENTIFIC)
 
     def show_programmer_mode(self) -> None:
-        self.stack.setCurrentIndex(1)
-        self.display.hide()
+        self.set_mode(AppMode.PROGRAMMER)
 
     def show_converter_mode(self) -> None:
-        self.stack.setCurrentIndex(2)
-        self.display.hide()
+        self.set_mode(AppMode.CONVERTER)
 
-    def create_display(self):
-
+    def create_display(self) -> None:
         self.display = QLabel("0")
-
         self.display.setAlignment(
             Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
         )
-
         self.display.setMinimumHeight(100)
-
         self.display.setSizePolicy(
             QSizePolicy.Policy.Expanding,
             QSizePolicy.Policy.Fixed,
         )
-
         self.calculator_layout.addWidget(self.display)
 
-    def create_history(self):
-
+    def create_history(self) -> None:
         title = QLabel("History")
         title.setObjectName("historyTitle")
-
         self.history = QListWidget()
         self.history.setObjectName("history")
-
         self.history.itemDoubleClicked.connect(self.restore_history)
 
         clear_button = QPushButton("Clear History")
@@ -177,115 +163,98 @@ class CalculatorWindow(QMainWindow):
         self.history_layout.addWidget(self.history)
         self.history_layout.addWidget(clear_button)
 
-    def keyPressEvent(self, event: QKeyEvent):
+    def keyPressEvent(self, event: QKeyEvent) -> None:
+        """Route global expression shortcuts only to expression-based modes."""
+        if not self.active_mode.uses_expression_model:
+            event.ignore()
+            return
 
         key = event.key()
         text = event.text()
-
-        if text.isdigit() or text in ["+", "-", ".", "^", "!", "(", ")"]:
+        expression_characters = {"+", "-", ".", "(", ")"}
+        if self.active_mode is AppMode.SCIENTIFIC:
+            expression_characters.update({"^", "!"})
+        if text.isdigit() or text in expression_characters:
             self.append_text(text)
-
         elif text == "*":
             self.append_text("×")
-
         elif text == "/":
             self.append_text("÷")
-
         elif key in (Qt.Key.Key_Return, Qt.Key.Key_Enter):
             self.calculate_result()
-
         elif key == Qt.Key.Key_Backspace:
             self.backspace()
-
         elif key == Qt.Key.Key_Escape:
             self.clear_display()
-
         else:
             super().keyPressEvent(event)
 
-    def button_clicked(self, text):
-
+    def button_clicked(self, text: str) -> None:
         if text == "C":
             self.clear_display()
-
         elif text == "=":
             self.calculate_result()
-
         elif text == "⌫":
             self.backspace()
-
         else:
             self.append_text(text)
 
-    def _is_postfix_text(self, text):
-        """Check if text is a postfix-style operator that should append to existing value."""
-        return text.startswith("^") or text == "%" or text == "!"
+    @staticmethod
+    def _is_postfix_text(text: str) -> bool:
+        """Check whether text should append to the existing expression."""
+        return text.startswith("^") or text in {"%", "!"}
 
-    def append_text(self, text):
+    def append_text(self, text: str) -> None:
         if self.display_is_error:
             self.display.setText("0")
             self.display_is_error = False
             self.just_calculated = False
 
         current = self.display.text()
-
         operators = ["+", "-", "×", "÷"]
-
-        # Postfix-style operators (^2, ^, %, !) should always append to the current value
         if self._is_postfix_text(text):
             if self.just_calculated:
                 self.just_calculated = False
             self.display.setText(current + text)
             return
-
-        # Start fresh after pressing =
         if self.just_calculated:
             self.display.setText(text)
             self.just_calculated = False
             return
-
-        # Prevent starting with × or ÷
         if current == "0" and text in ["×", "÷"]:
             return
-
-        # Replace the last operator if user presses another operator
         if current[-1] in operators and text in operators:
             self.display.setText(current[:-1] + text)
             return
-        # Prevent multiple decimal points in the current number
         if text == ".":
             last_number = current
-
-            for operator in ["+", "-", "×", "÷"]:
+            for operator in operators:
                 last_number = last_number.split(operator)[-1]
-
             if "." in last_number:
                 return
-        # Replace the initial 0
-        if current == "0":
-            self.display.setText(text)
-        else:
-            self.display.setText(current + text)
+        self.display.setText(text if current == "0" else current + text)
 
-    def clear_display(self):
+    def clear_display(self) -> None:
         self.display.setText("0")
         self.just_calculated = False
         self.display_is_error = False
 
-    def backspace(self):
+    def backspace(self) -> None:
         current = self.display.text()
-
         if self.display_is_error or not current or len(current) == 1:
             self.display.setText("0")
             self.display_is_error = False
             return
-
         self.display.setText(current[:-1])
 
-    def calculate_result(self):
+    def calculate_result(self) -> None:
         expression = self.display.text()
-        result_obj = evaluate_expression(expression, angle_mode=self.angle_mode)
-
+        angle_mode = (
+            self.scientific_page.angle_selector.currentText()
+            if self.active_mode is AppMode.SCIENTIFIC
+            else "DEG"
+        )
+        result_obj = evaluate_expression(expression, angle_mode=angle_mode)
         if result_obj.success:
             self.history.insertItem(0, f"{expression} = {result_obj.formatted_value}")
             self.display.setText(result_obj.formatted_value)
@@ -296,69 +265,38 @@ class CalculatorWindow(QMainWindow):
             self.just_calculated = False
             self.display_is_error = True
 
-    def restore_history(self, item):
-
-        text = item.text()
-
-        expression = text.split("=")[0].strip()
-
+    def restore_history(self, item) -> None:
+        expression = item.text().split("=")[0].strip()
         self.display.setText(expression)
-
         self.just_calculated = False
         self.display_is_error = False
 
-    def scientific_button_clicked(self, text):
-
-        if text == "sin":
-            self.append_text("sin(")
-
-        elif text == "cos":
-            self.append_text("cos(")
-
-        elif text == "tan":
-            self.append_text("tan(")
-
-        elif text == "log":
-            self.append_text("log(")
-
-        elif text == "ln":
-            self.append_text("ln(")
-
-        elif text == "√":
-            self.append_text("sqrt(")
-
-        elif text == "π":
-            self.append_text("pi")
-
-        elif text == "e":
-            self.append_text("e")
-
-        elif text == "x²":
-            self.append_text("^2")
-
-        elif text == "xʸ":
-            self.append_text("^")
-
-        elif text == "1/x":
-            self.append_text("1/(")
-
-        elif text == "%":
-            self.append_text("%")
-
-        elif text == "±":
+    def scientific_button_clicked(self, text: str) -> None:
+        scientific_inputs = {
+            "sin": "sin(",
+            "cos": "cos(",
+            "tan": "tan(",
+            "asin": "asin(",
+            "acos": "acos(",
+            "atan": "atan(",
+            "sinh": "sinh(",
+            "cosh": "cosh(",
+            "tanh": "tanh(",
+            "log": "log(",
+            "ln": "ln(",
+            "√": "sqrt(",
+            "π": "pi",
+            "e": "e",
+            "x²": "^2",
+            "xʸ": "^",
+            "1/x": "1/(",
+        }
+        if text == "±":
             current = self.display.text()
-
-            if current.startswith("-"):
-                self.display.setText(current[1:])
-            else:
-                self.display.setText("-" + current)
-
-        elif text == "=":
-            self.calculate_result()
-
+            self.display.setText(
+                current[1:] if current.startswith("-") else "-" + current
+            )
+        elif text in scientific_inputs:
+            self.append_text(scientific_inputs[text])
         else:
-            self.append_text(text)
-
-    def angle_mode_changed(self, mode):
-
-        self.angle_mode = mode
+            self.button_clicked(text)

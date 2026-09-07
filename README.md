@@ -4,11 +4,13 @@ A modern Linux desktop calculator written in Python and PySide6.
 
 ## Features
 
-- **Standard & Scientific Calculation**: Arithmetic, powers, roots, percentages, logarithms, and trigonometric functions with DEG / RAD / GRAD angle modes.
-- **Programmer Calculation**: Base conversion (BIN / OCT / DEC / HEX), integer arithmetic, bitwise operations, shifts, selectable word sizes, and two's-complement signed mode.
+- **Standard Calculator**: Normal arithmetic with addition, subtraction, multiplication, division, decimals, parentheses, clear, backspace, and equals.
+- **Scientific Calculator**: The standard keypad plus powers, roots, percentages, factorials, logarithms, trigonometric, inverse-trigonometric, and hyperbolic functions; constants; and DEG / RAD / GRAD angle modes.
+- **Programmer Calculator**: The existing integer calculator page with BIN / OCT / DEC / HEX representations, a bit display, selectable word size, and signedness controls. Its behavior is intentionally preserved while a dedicated Programmer Mode refinement is planned.
+- **Unit Converter**: An explicit application mode and page boundary. Unit conversions are not implemented yet.
 - **Modern Linux GUI**: Clean, dark-themed Qt interface tailored for Linux desktop environments (such as KDE Plasma).
-- **Calculation History**: Track, restore, and clear previous expressions and results.
-- **Extensible Architecture**: Modular separation between expression engine, services, and UI components.
+- **Calculation History**: Standard and Scientific modes share expression history, while Programmer and Converter retain their own page models.
+- **Explicit Mode Architecture**: Standard, Scientific, Programmer, and Converter navigation is driven by a central `AppMode` model rather than stack indexes.
 
 ## Architecture
 
@@ -26,15 +28,17 @@ Evaluator
 Result / CalculatorError
 ```
 
-### Programmer mode semantics
+### Application modes
 
-Programmer mode stores values as bit patterns and masks every operation to the
-selected 8-, 16-, 32-, or 64-bit word size. Unsigned mode displays values from
-zero through the word-size maximum. Signed mode interprets the same pattern as
-two's-complement, displays negative values with a leading `-`, and uses an
-arithmetic right shift. Input values are range-checked; arithmetic overflow
-wraps modulo the selected word size. Division truncates toward zero, and
-negative values require signed mode.
+`AppMode` provides stable identifiers for all top-level modes. The window maps
+those identifiers to pages with `QStackedWidget.setCurrentWidget`, so page order
+is not part of the application contract. This leaves a clean path for future
+keyboard shortcuts and saved mode preferences.
+
+Standard and Scientific modes deliberately share the existing expression
+display and history because both use the scientific expression engine.
+Programmer has its own integer input and base/bit representation, and Converter
+has its own page boundary for its future input/output controls.
 
 ## Getting Started
 
@@ -109,9 +113,11 @@ src/
 ├── styles/
 │   └── main.qss      # Application stylesheet
 ├── ui/
+│   ├── modes.py      # Central application-mode model
 │   └── window.py     # Main application window
 ├── widgets/          # Reusable Qt widgets
 │   ├── calculator_page.py
+│   ├── scientific_page.py
 │   ├── mode_bar.py
 │   ├── programmer_page.py
 │   └── converter_page.py
