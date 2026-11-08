@@ -59,9 +59,10 @@ If Windows SmartScreen displays an unknown-publisher warning, review the source 
 ### macOS installation
 
 1. Download and extract the macOS ZIP asset.
-2. Run the included `kira-calculator` executable from Terminal.
+2. Move `kira-calculator.app` into Applications.
+3. Open it from Finder. If macOS blocks it because the app is not signed or notarized, review the source and release provenance before deciding whether to allow it.
 
-The macOS build is not currently notarized. Gatekeeper may warn when launching an unsigned build. Review the release provenance and source before deciding whether to proceed.
+The macOS build is not currently code-signed or notarized.
 
 ### Build from source
 
