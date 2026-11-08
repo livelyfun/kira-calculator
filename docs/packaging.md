@@ -1,64 +1,50 @@
-# Kira Calculator: Packaging & Release Guide
+# Packaging and Releases
 
-## 1. Overview
+## Public downloads
 
-Kira Calculator is distributed as a standalone desktop application across Linux, Windows, and macOS without requiring end users to pre-install Python or Qt.
+Published binaries are distributed through [GitHub Releases](https://github.com/livelyfun/kira-calculator/releases). The CI workflow builds on native GitHub-hosted Linux, Windows, and macOS runners. A version tag matching `v*` (for example, `v1.0.1`) runs linting, the test matrix, and packaging. Only when all required jobs succeed does the workflow create a GitHub Release and attach the platform assets.
 
-Packaging is managed via PyInstaller with platform-specific asset bundling and metadata generation.
+GitHub Actions workflow artifacts from ordinary branch builds are temporary CI artifacts, not permanent public downloads.
 
----
+## Release assets
 
-## 2. Linux Packaging
+| Platform | Asset |
+| --- | --- |
+| Linux x86_64 | `kira-calculator-<version>-linux-x86_64.tar.gz` plus SHA256 file |
+| Windows x64 | `kira-calculator-windows-x64.zip` |
+| macOS | `kira-calculator-macos.zip` |
+| All assets | `SHA256SUMS.txt` |
 
-### Artifacts Delivered
-- **Standalone Single Binary:** `dist/kira-calculator`
-- **Distributable Release Tarball:** `dist/kira-calculator-1.0.0-linux-x86_64.tar.gz`
-- **SHA256 Checksum:** `dist/kira-calculator-1.0.0-linux-x86_64.tar.gz.sha256`
-- **Desktop Launcher File:** `packaging/linux/kira-calculator.desktop`
-- **HiDPI Icon:** `assets/icons/kira-calculator.png`
+The Linux archive contains the standalone executable under `bin/kira-calculator`, along with the desktop entry, icon, README, and license when those source assets are present. The AppImage is not currently built in CI: the repository does not include the AppImage tooling/runtime required by the local AppImage packaging path.
 
-### Building Standalone Linux Executable
+## Build locally
+
+Install the packaging extra and build on the target operating system:
+
 ```bash
-# Build standalone single-file binary with embedded assets
-python3 scripts/build_app.py --onefile
-
-# Build folder-based distribution
-python3 scripts/build_app.py
+python -m pip install -e ".[packaging]"
+python scripts/build_app.py --onefile
 ```
 
-### Installation from Tarball
-```bash
-tar -xzf dist/kira-calculator-1.0.0-linux-x86_64.tar.gz
-cd kira-calculator
+The script creates a PyInstaller single-file executable. On Linux it also creates a compressed distribution archive and SHA256 sidecar. Windows and macOS builds produce their native executable; CI wraps those executables in ZIP archives for release distribution.
 
-# Run directly
-./kira-calculator
+## Release workflow
 
-# Or install to user desktop environment
-cp share/applications/kira-calculator.desktop ~/.local/share/applications/
-cp share/icons/hicolor/256x256/apps/kira-calculator.png ~/.local/share/icons/
-```
+1. Update the project version in `pyproject.toml` before preparing a new version.
+2. Push a version tag, for example `v1.0.1`.
+3. GitHub Actions runs lint, tests across Python 3.10–3.13 on Linux/Windows/macOS, and native packaging.
+4. If all jobs pass, the release job publishes the assets and a `SHA256SUMS.txt` manifest.
 
----
+Do not publish a release from a tag until its source tree and version metadata represent the intended release.
 
-## 3. Windows & macOS CI Packaging
+## Platform notes
 
-Packaging for Windows and macOS is executed via the GitHub Actions CI matrix on native virtual environments:
-- **Windows (`windows-latest`):** Builds standalone `kira-calculator.exe` with bundled Qt DLLs and application icon.
-- **macOS (`macos-latest`):** Builds standalone `kira-calculator.app` bundle with high-DPI icon and Retina display support.
+- **Linux:** x86_64 build from `ubuntu-latest`. The target machine must provide compatible system libraries for the Qt platform plugin.
+- **Windows:** x64 executable in a ZIP archive. The executable is not currently code-signed.
+- **macOS:** executable in a ZIP archive. The build is not currently signed or notarized; Gatekeeper may show a warning.
 
----
+The binaries bundle the application and Python/Qt dependencies through PyInstaller. Users do not need to install Python separately.
 
-## 4. Verification Checklist for Packaged Binaries
+## Verification
 
-Each build must verify:
-- [x] Launches on a clean system without Python installed.
-- [x] Loads Dark and Light themes correctly from bundled resources.
-- [x] Standard mode arithmetic and precedence work.
-- [x] Scientific mode with DEG, RAD, and GRAD angle calculations works.
-- [x] Programmer mode multi-base conversion and bit grid work.
-- [x] Converter mode bidirectional unit conversions work.
-- [x] History entries persist across application restarts in platform data directory.
-- [x] User settings persist across restarts in platform config directory.
-- [x] Application closes cleanly with status code 0.
-
+The CI pipeline runs the test suite before packaging. Packaged binaries should additionally be smoke-tested on clean target operating systems before being described as independently verified. A successful build proves packaging completed; it does not by itself prove compatibility with every OS version or desktop environment.
