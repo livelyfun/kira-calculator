@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Kira Calculator
+Comment=Modern, secure, cross-platform desktop calculator with standard, scientific, programmer, and converter modes.
+GenericName=Calculator
+Exec=kira-calculator %U
+Icon=kira-calculator
+Terminal=false
+Type=Application
+Categories=Utility;Calculator;Science;Math;Education;
+Keywords=calculator;math;scientific;programmer;converter;hex;binary;
+StartupNotify=true
+StartupWMClass=kira-calculator
+

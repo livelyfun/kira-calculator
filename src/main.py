@@ -1,26 +1,14 @@
+"""Legacy root launcher delegating to kira_calculator.app."""
+
 import sys
 from pathlib import Path
 
-from PySide6.QtWidgets import QApplication
+# Add src directory to sys.path if not present
+src_dir = Path(__file__).resolve().parent
+if str(src_dir) not in sys.path:
+    sys.path.insert(0, str(src_dir))
 
-from ui.window import CalculatorWindow
-
-
-def main():
-
-    app = QApplication(sys.argv)
-
-    style_path = Path(__file__).parent / "styles" / "main.qss"
-
-    if style_path.exists():
-        with open(style_path, "r") as file:
-            app.setStyleSheet(file.read())
-
-    window = CalculatorWindow()
-    window.show()
-
-    sys.exit(app.exec())
-
+from kira_calculator.app import main  # noqa: E402
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

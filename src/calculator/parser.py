@@ -1,9 +1,4 @@
-def prepare_expression(expression: str) -> str:
-    """
-    Convert calculator symbols into Python operators.
-    """
+"""Backward-compatible parser facade."""
 
-    expression = expression.replace("×", "*")
-    expression = expression.replace("÷", "/")
-
-    return expression
+from kira_calculator.core.parser import Parser  # noqa: F401
+from kira_calculator.core.tokenizer import tokenize  # noqa: F401

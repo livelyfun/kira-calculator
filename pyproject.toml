@@ -1,0 +1,72 @@
+[build-system]
+requires = ["setuptools>=68.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "kira-calculator"
+version = "1.0.0"
+description = "A modern, secure, cross-platform desktop calculator built with Python and PySide6."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [
+    { name = "Mithlesh Das", email = "livelyfun@users.noreply.github.com" },
+    { name = "Kira Calculator Contributors" }
+]
+keywords = ["calculator", "scientific", "programmer", "unit-converter", "pyside6", "qt6", "desktop"]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "Environment :: X11 Applications :: Qt",
+    "Environment :: Win32 (MS Windows)",
+    "Environment :: MacOS X",
+    "Intended Audience :: End Users/Desktop",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Scientific/Engineering :: Mathematics",
+    "Topic :: Desktop Environment",
+]
+dependencies = [
+    "PySide6>=6.5.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "ruff>=0.4.0",
+]
+packaging = [
+    "pyinstaller>=6.0.0",
+]
+
+[project.scripts]
+kira-calculator = "kira_calculator.app:main"
+
+[project.urls]
+Homepage = "https://github.com/livelyfun/kira-calculator"
+Repository = "https://github.com/livelyfun/kira-calculator"
+Issues = "https://github.com/livelyfun/kira-calculator/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+kira_calculator = ["ui/themes/*.qss", "resources/*", "resources/icons/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+
+[tool.ruff]
+line-length = 95
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "UP", "B"]
+ignore = ["E501"]
+

@@ -1,28 +1,17 @@
-from calculator.parser import prepare_expression
+"""Backward-compatible facade delegating to the secure kira_calculator engine."""
 
+from __future__ import annotations
 
-def evaluate_expression(expression: str) -> str:
-    """
-    Evaluate a prepared expression.
-    """
+from kira_calculator.core.engine import (
+    CalculationResult,
+    calculate,
+    evaluate_expression,
+)
+from kira_calculator.core.formatter import format_number
 
-    try:
-        result = eval(expression)
-
-        if isinstance(result, float) and result.is_integer():
-            result = int(result)
-
-        return str(result)
-
-    except Exception:  # noqa: BLE001
-        return "Error"
-
-
-def calculate(expression: str) -> str:
-    """
-    Main entry point for calculator logic.
-    """
-
-    prepared = prepare_expression(expression)
-
-    return evaluate_expression(prepared)
+__all__ = [
+    "CalculationResult",
+    "calculate",
+    "evaluate_expression",
+    "format_number",
+]

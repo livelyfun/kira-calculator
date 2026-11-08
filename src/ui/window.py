@@ -57,7 +57,7 @@ class CalculatorWindow(QMainWindow):
 
         self.calculator_page = CalculatorPage()
         for text, button in self.calculator_page.buttons.items():
-       
+
            if text in [
                "sin",
                "cos",
@@ -75,16 +75,16 @@ class CalculatorWindow(QMainWindow):
                "(",
                ")",
            ]:
-       
+
                button.clicked.connect(
                    lambda checked=False, t=text: self.scientific_button_clicked(t)
                )
-       
+
            else:
-           
+
                button.clicked.connect(
                    lambda checked=False, t=text: self.button_clicked(t)
-               )       
+               )
         self.programmer_page = ProgrammerPage()
         self.converter_page = ConverterPage()
 
@@ -98,11 +98,11 @@ class CalculatorWindow(QMainWindow):
         self.mode_bar.calculator_button.clicked.connect(
             lambda: self.stack.setCurrentIndex(0)
         )
-        
+
         self.mode_bar.programmer_button.clicked.connect(
             lambda: self.stack.setCurrentIndex(1)
         )
-        
+
         self.mode_bar.converter_button.clicked.connect(
             lambda: self.stack.setCurrentIndex(2)
         )
@@ -163,7 +163,7 @@ class CalculatorWindow(QMainWindow):
         self.history_layout.addWidget(self.history)
         self.history_layout.addWidget(clear_button)
 
- 
+
 
     def keyPressEvent(self, event: QKeyEvent):
 

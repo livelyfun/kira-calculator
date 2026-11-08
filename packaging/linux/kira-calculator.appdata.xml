@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<component type="desktop-application">
+  <id>com.livelyfun.KiraCalculator</id>
+  <metadata_license>MIT</metadata_license>
+  <project_license>MIT</project_license>
+  <name>Kira Calculator</name>
+  <summary>Modern, secure, cross-platform desktop calculator</summary>
+  <description>
+    <p>
+      Kira Calculator is an engineered desktop calculator with standard, scientific, programmer, and unit converter modes.
+    </p>
+  </description>
+  <launchable type="desktop-id">kira-calculator.desktop</launchable>
+  <url type="homepage">https://github.com/livelyfun/kira-calculator</url>
+  <provides>
+    <binary>kira-calculator</binary>
+  </provides>
+</component>
