@@ -12,6 +12,7 @@ import stat
 import subprocess
 import sys
 import tarfile
+import zipfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -66,6 +67,46 @@ EXCLUDED_MODULES = [
     "pytest",
     "ruff",
 ]
+
+
+def get_project_version() -> str:
+    """Read authoritative version from pyproject.toml."""
+    pyproject_path = ROOT / "pyproject.toml"
+    if pyproject_path.exists():
+        try:
+            import tomllib
+
+            with open(pyproject_path, "rb") as f:
+                data = tomllib.load(f)
+            ver = data.get("project", {}).get("version")
+            if ver:
+                return str(ver)
+        except Exception:
+            pass
+        import re
+
+        content = pyproject_path.read_text(encoding="utf-8")
+        match = re.search(r'version\s*=\s*"([^"]+)"', content)
+        if match:
+            return match.group(1)
+
+    try:
+        from kira_calculator import __version__
+
+        return __version__
+    except Exception:
+        return "1.0.0"
+
+
+def validate_tag(tag: str) -> bool:
+    """Validate that a git tag string matches the project version."""
+    clean_tag = tag.strip()
+    if clean_tag.startswith("refs/tags/"):
+        clean_tag = clean_tag[len("refs/tags/") :]
+    if clean_tag.startswith("v"):
+        clean_tag = clean_tag[1:]
+    project_version = get_project_version()
+    return clean_tag == project_version
 
 
 def sha256_file(path: Path) -> str:
@@ -133,21 +174,33 @@ def build_pyinstaller(onefile: bool = False, clean: bool = True) -> Path:
         # PyInstaller creates a macOS .app bundle for windowed applications.
         output_path = DIST / "kira-calculator.app"
     else:
-        output_path = DIST / ("kira-calculator.exe" if sys.platform.startswith("win") else "kira-calculator")
+        output_path = DIST / (
+            "kira-calculator.exe" if sys.platform.startswith("win") else "kira-calculator"
+        )
         if not onefile:
-            output_path = DIST / "kira-calculator" / ("kira-calculator.exe" if sys.platform.startswith("win") else "kira-calculator")
+            output_path = (
+                DIST
+                / "kira-calculator"
+                / (
+                    "kira-calculator.exe"
+                    if sys.platform.startswith("win")
+                    else "kira-calculator"
+                )
+            )
 
     return output_path
 
 
-def package_tarball(app_dir: Path, version: str = "1.0.0") -> Path:
+def package_tarball(app_dir: Path, version: str | None = None) -> Path:
     """Create a distributable tarball for Linux with desktop file and icon."""
-    system_tag = platform.system().lower()
+    ver = version or get_project_version()
     machine_tag = platform.machine().lower()
-    archive_name = f"kira-calculator-{version}-{system_tag}-{machine_tag}.tar.gz"
+    if machine_tag in ("amd64", "x86_64"):
+        machine_tag = "x86_64"
+    archive_name = f"kira-calculator-{ver}-linux-{machine_tag}.tar.gz"
     archive_path = DIST / archive_name
 
-    print(f"\nCreating release archive: {archive_path}")
+    print(f"\nCreating Linux release archive: {archive_path}")
     with tarfile.open(archive_path, "w:gz") as tar:
         # Add the application folder or binary
         if app_dir.is_dir():
@@ -158,11 +211,17 @@ def package_tarball(app_dir: Path, version: str = "1.0.0") -> Path:
         # Add desktop entry and icon
         desktop_file = PACKAGING / "linux" / "kira-calculator.desktop"
         if desktop_file.exists():
-            tar.add(desktop_file, arcname="kira-calculator/share/applications/kira-calculator.desktop")
+            tar.add(
+                desktop_file,
+                arcname="kira-calculator/share/applications/kira-calculator.desktop",
+            )
 
         icon_file = ROOT / "assets" / "icons" / "kira-calculator.png"
         if icon_file.exists():
-            tar.add(icon_file, arcname="kira-calculator/share/icons/hicolor/256x256/apps/kira-calculator.png")
+            tar.add(
+                icon_file,
+                arcname="kira-calculator/share/icons/hicolor/256x256/apps/kira-calculator.png",
+            )
 
         # Add README and LICENSE
         readme = ROOT / "README.md"
@@ -173,20 +232,100 @@ def package_tarball(app_dir: Path, version: str = "1.0.0") -> Path:
             tar.add(license_file, arcname="kira-calculator/LICENSE")
 
     checksum = sha256_file(archive_path)
-    # Correct filename: exact .tar.gz.sha256 extension
     checksum_file = archive_path.parent / f"{archive_path.name}.sha256"
     checksum_file.write_text(f"{checksum}  {archive_name}\n")
     print(f"Archive SHA256: {checksum} -> {checksum_file.name}")
     return archive_path
 
 
-def package_appimage(binary_path: Path, version: str = "1.0.0") -> Path | None:
+def package_zip_windows(binary_path: Path, version: str | None = None) -> Path:
+    """Create a distributable ZIP archive for Windows."""
+    archive_name = "kira-calculator-windows-x64.zip"
+    archive_path = DIST / archive_name
+
+    print(f"\nCreating Windows release archive: {archive_path}")
+    with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        if binary_path.is_dir():
+            for root, _, files in os.walk(binary_path):
+                for file in files:
+                    full_path = Path(root) / file
+                    rel = full_path.relative_to(binary_path)
+                    zf.write(full_path, arcname=f"kira-calculator/{rel}")
+        else:
+            zf.write(binary_path, arcname=f"kira-calculator/{binary_path.name}")
+
+        readme = ROOT / "README.md"
+        if readme.exists():
+            zf.write(readme, arcname="kira-calculator/README.md")
+        license_file = ROOT / "LICENSE"
+        if license_file.exists():
+            zf.write(license_file, arcname="kira-calculator/LICENSE")
+        icon_file = ROOT / "assets" / "icons" / "kira-calculator.png"
+        if icon_file.exists():
+            zf.write(icon_file, arcname="kira-calculator/kira-calculator.png")
+
+    checksum = sha256_file(archive_path)
+    checksum_file = archive_path.parent / f"{archive_path.name}.sha256"
+    checksum_file.write_text(f"{checksum}  {archive_name}\n")
+    print(f"Archive SHA256: {checksum} -> {checksum_file.name}")
+    return archive_path
+
+
+def package_zip_macos(target_path: Path, version: str | None = None) -> Path:
+    """Create a distributable ZIP archive for macOS."""
+    archive_name = "kira-calculator-macos.zip"
+    archive_path = DIST / archive_name
+
+    print(f"\nCreating macOS release archive: {archive_path}")
+    with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zf:
+        if target_path.is_dir():
+            for root, _, files in os.walk(target_path):
+                for file in files:
+                    full_path = Path(root) / file
+                    rel = full_path.relative_to(target_path.parent)
+                    zf.write(full_path, arcname=str(rel))
+        else:
+            zf.write(target_path, arcname=f"kira-calculator/{target_path.name}")
+
+        readme = ROOT / "README.md"
+        if readme.exists():
+            zf.write(readme, arcname="README.md")
+        license_file = ROOT / "LICENSE"
+        if license_file.exists():
+            zf.write(license_file, arcname="LICENSE")
+
+    checksum = sha256_file(archive_path)
+    checksum_file = archive_path.parent / f"{archive_path.name}.sha256"
+    checksum_file.write_text(f"{checksum}  {archive_name}\n")
+    print(f"Archive SHA256: {checksum} -> {checksum_file.name}")
+    return archive_path
+
+
+def package_archive(target_path: Path, version: str | None = None) -> Path:
+    """Package platform-specific release archive with checksum."""
+    system = platform.system().lower()
+    if system == "linux":
+        return package_tarball(target_path, version=version)
+    elif system == "windows":
+        return package_zip_windows(target_path, version=version)
+    elif system == "darwin":
+        return package_zip_macos(target_path, version=version)
+    else:
+        return package_tarball(target_path, version=version)
+
+
+def package_appimage(binary_path: Path, version: str | None = None) -> Path | None:
     """Create a standalone AppImage for Linux."""
     appimagetool = PACKAGING / "tools" / "appimagetool"
     if not appimagetool.exists():
-        print("Note: packaging/tools/appimagetool not found; skipping AppImage build.")
-        return None
+        system_appimagetool = shutil.which("appimagetool")
+        if system_appimagetool:
+            appimagetool = Path(system_appimagetool)
+        else:
+            print("Note: packaging/tools/appimagetool not found; skipping AppImage build.")
+            return None
 
+    ver = version or get_project_version()
     print("\n=== Building Linux AppImage ===")
     app_dir = DIST / "AppDir"
     if app_dir.exists():
@@ -237,18 +376,19 @@ exec "${HERE}/usr/bin/kira-calculator" "$@"
     apprun.chmod(0o755)
     subprocess.check_call(["chmod", "-R", "a+rX", str(app_dir)])
 
-    appimage_name = f"kira-calculator-{version}-x86_64.AppImage"
+    appimage_name = f"kira-calculator-{ver}-x86_64.AppImage"
     appimage_path = DIST / appimage_name
 
     cmd = [
         str(appimagetool),
         "--appimage-extract-and-run",
         "--no-appstream",
-        "--runtime-file",
-        str(PACKAGING / "tools" / "runtime-x86_64"),
-        str(app_dir),
-        str(appimage_path),
     ]
+    runtime_file = PACKAGING / "tools" / "runtime-x86_64"
+    if runtime_file.exists():
+        cmd.extend(["--runtime-file", str(runtime_file)])
+    cmd.extend([str(app_dir), str(appimage_path)])
+
     env = os.environ.copy()
     env["ARCH"] = "x86_64"
     print(f"+ {' '.join(cmd)}")
@@ -267,28 +407,98 @@ exec "${HERE}/usr/bin/kira-calculator" "$@"
 
 def main() -> int:
     parser = argparse.ArgumentParser(description="Build and package Kira Calculator")
-    parser.add_argument("--onefile", action="store_true", default=True, help="Build single standalone executable")
-    parser.add_argument("--tarball", action="store_true", default=True, help="Create distributable archive")
-    parser.add_argument("--appimage", action="store_true", default=True, help="Create AppImage (Linux)")
-    parser.add_argument("--no-clean", action="store_true", help="Do not clean build cache before building")
+    parser.add_argument(
+        "--get-version",
+        action="store_true",
+        help="Print project version from pyproject.toml and exit",
+    )
+    parser.add_argument(
+        "--check-tag",
+        type=str,
+        default="",
+        help="Validate that a git tag string matches the project version",
+    )
+    parser.add_argument(
+        "--onefile",
+        action="store_true",
+        default=True,
+        help="Build single standalone executable",
+    )
+    parser.add_argument(
+        "--archive",
+        action="store_true",
+        default=True,
+        help="Create distributable archive for current platform",
+    )
+    parser.add_argument(
+        "--tarball",
+        action="store_true",
+        default=False,
+        help="Alias for --archive",
+    )
+    parser.add_argument(
+        "--appimage",
+        action="store_true",
+        default=False,
+        help="Create AppImage (Linux only if tools present)",
+    )
+    parser.add_argument(
+        "--no-clean",
+        action="store_true",
+        help="Do not clean build cache before building",
+    )
     args = parser.parse_args()
 
-    print(f"=== Building Optimized Kira Calculator on {platform.system()} ({platform.machine()}) ===")
+    project_version = get_project_version()
+
+    if args.get_version:
+        print(project_version)
+        return 0
+
+    if args.check_tag:
+        if not validate_tag(args.check_tag):
+            clean_tag = args.check_tag.strip()
+            if clean_tag.startswith("refs/tags/"):
+                clean_tag = clean_tag[len("refs/tags/") :]
+            if clean_tag.startswith("v"):
+                clean_tag = clean_tag[1:]
+            print(
+                f"ERROR: Tag version '{clean_tag}' does not match pyproject.toml version '{project_version}'!",
+                file=sys.stderr,
+            )
+            return 1
+        print(f"SUCCESS: Tag '{args.check_tag}' matches project version '{project_version}'.")
+        return 0
+
+    print(
+        f"=== Building Optimized Kira Calculator v{project_version} on {platform.system()} ({platform.machine()}) ==="
+    )
     binary_path = build_pyinstaller(onefile=args.onefile, clean=not args.no_clean)
 
     if not binary_path.exists():
-        print(f"ERROR: Build output {binary_path} was not created!", file=sys.stderr)
+        print(
+            f"ERROR: Build output {binary_path} was not created!",
+            file=sys.stderr,
+        )
         return 1
 
     size_mb = binary_path.stat().st_size / (1024 * 1024)
     print(f"\nSuccessfully built optimized binary: {binary_path} ({size_mb:.1f} MB)")
 
-    if args.tarball and platform.system().lower() == "linux":
-        dist_dir = DIST / "kira-calculator" if not args.onefile else binary_path
-        package_tarball(dist_dir)
+    if args.archive or args.tarball:
+        dist_dir = (
+            DIST / "kira-calculator"
+            if not args.onefile
+            else (
+                DIST / "kira-calculator.app"
+                if (DIST / "kira-calculator.app").exists()
+                else binary_path
+            )
+        )
+        package_archive(dist_dir, version=project_version)
 
     if args.appimage and platform.system().lower() == "linux":
-        package_appimage(binary_path)
+        package_appimage(binary_path, version=project_version)
 
     print("\nPackaging completed successfully.")
     return 0

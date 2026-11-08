@@ -267,9 +267,7 @@ class ProgrammerCalculator:
     def to_unsigned(self, value: int) -> int:
         return self._normalize(value)
 
-    def parse_value(
-        self, value: str, base: NumberBase | str | None = None
-    ) -> int:
+    def parse_value(self, value: str, base: NumberBase | str | None = None) -> int:
         selected_base = self.base if base is None else self._coerce_base(base)
         text = value.strip().replace("_", "")
         if not text:
@@ -342,9 +340,7 @@ class ProgrammerCalculator:
             return self._normalize(value)
         if operator == "-":
             if not self.signed:
-                raise InvalidProgrammerNumberError(
-                    "Negative values require signed mode"
-                )
+                raise InvalidProgrammerNumberError("Negative values require signed mode")
             return self._normalize(-value)
         if operator == "~":
             return self._normalize(~value)

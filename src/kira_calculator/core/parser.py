@@ -34,9 +34,7 @@ class Parser:
             CalculatorSyntaxError: If the expression has invalid syntax or is empty.
             SecurityError: If nesting depth or node count exceeds limits.
         """
-        if not self.tokens or (
-            len(self.tokens) == 1 and self.tokens[0].type == TokenType.EOF
-        ):
+        if not self.tokens or (len(self.tokens) == 1 and self.tokens[0].type == TokenType.EOF):
             raise CalculatorSyntaxError("Empty expression")
 
         root = self.parse_expression()
@@ -328,4 +326,3 @@ class Parser:
         raise CalculatorSyntaxError(
             f"Unexpected token '{token.value}'", position=token.position
         )
-

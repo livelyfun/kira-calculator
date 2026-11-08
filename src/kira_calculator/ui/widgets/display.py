@@ -29,12 +29,18 @@ class DisplayWidget(QFrame):
 
         self.status_label = QLabel("")
         self.status_label.setObjectName("displayStatus")
-        self.status_label.setAlignment(Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter)
+        self.status_label.setAlignment(
+            Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter
+        )
 
         self.expression_label = QLabel("")
         self.expression_label.setObjectName("displayExpression")
-        self.expression_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        self.expression_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
+        self.expression_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        self.expression_label.setTextInteractionFlags(
+            Qt.TextInteractionFlag.TextSelectableByMouse
+        )
 
         top_row.addWidget(self.status_label)
         top_row.addStretch()
@@ -44,8 +50,12 @@ class DisplayWidget(QFrame):
         # Main result label (large, right aligned)
         self.result_label = QLabel("0")
         self.result_label.setObjectName("displayResult")
-        self.result_label.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
-        self.result_label.setSizePolicy(QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred)
+        self.result_label.setAlignment(
+            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
+        )
+        self.result_label.setSizePolicy(
+            QSizePolicy.Policy.Expanding, QSizePolicy.Policy.Preferred
+        )
         self.result_label.setTextInteractionFlags(Qt.TextInteractionFlag.TextSelectableByMouse)
         layout.addWidget(self.result_label)
 
@@ -68,4 +78,3 @@ class DisplayWidget(QFrame):
         self.result_label.setText("0")
         self.expression_label.setText("")
         self.status_label.setText("")
-

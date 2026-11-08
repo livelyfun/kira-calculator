@@ -57,34 +57,29 @@ class CalculatorWindow(QMainWindow):
 
         self.calculator_page = CalculatorPage()
         for text, button in self.calculator_page.buttons.items():
+            if text in [
+                "sin",
+                "cos",
+                "tan",
+                "log",
+                "ln",
+                "√",
+                "π",
+                "e",
+                "x²",
+                "xʸ",
+                "%",
+                "±",
+                "1/x",
+                "(",
+                ")",
+            ]:
+                button.clicked.connect(
+                    lambda checked=False, t=text: self.scientific_button_clicked(t)
+                )
 
-           if text in [
-               "sin",
-               "cos",
-               "tan",
-               "log",
-               "ln",
-               "√",
-               "π",
-               "e",
-               "x²",
-               "xʸ",
-               "%",
-               "±",
-               "1/x",
-               "(",
-               ")",
-           ]:
-
-               button.clicked.connect(
-                   lambda checked=False, t=text: self.scientific_button_clicked(t)
-               )
-
-           else:
-
-               button.clicked.connect(
-                   lambda checked=False, t=text: self.button_clicked(t)
-               )
+            else:
+                button.clicked.connect(lambda checked=False, t=text: self.button_clicked(t))
         self.programmer_page = ProgrammerPage()
         self.converter_page = ConverterPage()
 
@@ -95,17 +90,11 @@ class CalculatorWindow(QMainWindow):
 
         self.calculator_layout.addWidget(self.stack)
 
-        self.mode_bar.calculator_button.clicked.connect(
-            lambda: self.stack.setCurrentIndex(0)
-        )
+        self.mode_bar.calculator_button.clicked.connect(lambda: self.stack.setCurrentIndex(0))
 
-        self.mode_bar.programmer_button.clicked.connect(
-            lambda: self.stack.setCurrentIndex(1)
-        )
+        self.mode_bar.programmer_button.clicked.connect(lambda: self.stack.setCurrentIndex(1))
 
-        self.mode_bar.converter_button.clicked.connect(
-            lambda: self.stack.setCurrentIndex(2)
-        )
+        self.mode_bar.converter_button.clicked.connect(lambda: self.stack.setCurrentIndex(2))
 
         calculator_widget = QWidget()
         calculator_widget.setLayout(self.calculator_layout)
@@ -132,9 +121,7 @@ class CalculatorWindow(QMainWindow):
 
         self.display = QLabel("0")
 
-        self.display.setAlignment(
-            Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter
-        )
+        self.display.setAlignment(Qt.AlignmentFlag.AlignRight | Qt.AlignmentFlag.AlignVCenter)
 
         self.display.setMinimumHeight(100)
 
@@ -162,8 +149,6 @@ class CalculatorWindow(QMainWindow):
         self.history_layout.addWidget(title)
         self.history_layout.addWidget(self.history)
         self.history_layout.addWidget(clear_button)
-
-
 
     def keyPressEvent(self, event: QKeyEvent):
 
@@ -321,7 +306,6 @@ class CalculatorWindow(QMainWindow):
             self.append_text("/100")
 
         elif text == "±":
-
             current = self.display.text()
 
             if current.startswith("-"):

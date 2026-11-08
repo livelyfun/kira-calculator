@@ -20,9 +20,7 @@ class HistoryEntry:
     expression: str = ""
     result: str = ""
     mode: str = "Standard"
-    timestamp: str = field(
-        default_factory=lambda: datetime.now(timezone.utc).isoformat()
-    )
+    timestamp: str = field(default_factory=lambda: datetime.now(timezone.utc).isoformat())
     details: dict[str, Any] = field(default_factory=dict)
 
     @classmethod

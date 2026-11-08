@@ -88,4 +88,3 @@ def calculate(expression: str, angle_mode: AngleMode | str = AngleMode.DEG) -> s
         return res.formatted_value
     # In standard UI display, if it begins with "Error: ", return it or the message
     return res.formatted_value
-

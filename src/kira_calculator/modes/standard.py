@@ -15,4 +15,3 @@ class StandardCalculator:
     @staticmethod
     def evaluate(expression: str) -> CalculationResult:
         return evaluate_expression(expression)
-

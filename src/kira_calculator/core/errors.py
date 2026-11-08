@@ -85,4 +85,3 @@ class UnknownUnitError(ConverterError):
 
 class IncompatibleUnitError(ConverterError):
     """Raised when converting between mismatched unit categories."""
-

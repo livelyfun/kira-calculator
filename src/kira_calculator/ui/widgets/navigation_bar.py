@@ -83,4 +83,3 @@ class NavigationBar(QFrame):
             self.theme_combo.setCurrentText("Light Theme")
         else:
             self.theme_combo.setCurrentText("Dark Theme")
-

@@ -17,4 +17,3 @@ class ScientificCalculator:
 
     def evaluate(self, expression: str) -> CalculationResult:
         return evaluate_expression(expression, angle_mode=self.angle_mode)
-

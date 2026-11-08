@@ -129,11 +129,47 @@ jobs:
       contents: write
       actions: read
     steps:
-      - uses: actions/download-artifact@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Validate tag matches project version
+        run: python scripts/build_app.py --check-tag ${{ github.ref_name }}
+
+      - name: Download all package artifacts
+        uses: actions/download-artifact@v4
         with:
           pattern: kira-calculator-*
           path: release-assets
           merge-multiple: true
+
+      - name: Verify required platform release archives exist
+        run: |
+          set -euo pipefail
+          echo "Inspecting release assets in release-assets:"
+          ls -la release-assets/
+
+          count_linux=$(find release-assets -name "kira-calculator-*-linux-*.tar.gz" | wc -l)
+          count_win=$(find release-assets -name "kira-calculator-windows-x64.zip" | wc -l)
+          count_mac=$(find release-assets -name "kira-calculator-macos.zip" | wc -l)
+
+          if [ "$count_linux" -eq 0 ]; then
+            echo "ERROR: Missing Linux release tarball in release-assets!" >&2
+            exit 1
+          fi
+          if [ "$count_win" -eq 0 ]; then
+            echo "ERROR: Missing Windows release zip in release-assets!" >&2
+            exit 1
+          fi
+          if [ "$count_mac" -eq 0 ]; then
+            echo "ERROR: Missing macOS release zip in release-assets!" >&2
+            exit 1
+          fi
+          echo "All required platform release archives confirmed present."
       - name: Generate SHA256 checksums
         run: |
           python - <<'PY'

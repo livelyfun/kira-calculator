@@ -46,17 +46,20 @@ CATEGORIES: dict[str, dict[str, UnitDefinition]] = {
     },
     "Temperature": {
         "Celsius (°C)": UnitDefinition(
-            "Celsius", "°C",
+            "Celsius",
+            "°C",
             to_base=lambda c: c,
             from_base=lambda c: c,
         ),
         "Fahrenheit (°F)": UnitDefinition(
-            "Fahrenheit", "°F",
+            "Fahrenheit",
+            "°F",
             to_base=lambda f: (f - 32.0) * 5.0 / 9.0,
             from_base=lambda c: (c * 9.0 / 5.0) + 32.0,
         ),
         "Kelvin (K)": UnitDefinition(
-            "Kelvin", "K",
+            "Kelvin",
+            "K",
             to_base=lambda k: k - 273.15,
             from_base=lambda c: c + 273.15,
         ),
@@ -105,8 +108,12 @@ CATEGORIES: dict[str, dict[str, UnitDefinition]] = {
         "US Quart (qt)": UnitDefinition("US Quart", "qt", *_linear(0.946352946)),
         "US Pint (pt)": UnitDefinition("US Pint", "pt", *_linear(0.473176473)),
         "US Cup (cup)": UnitDefinition("US Cup", "cup", *_linear(0.2365882365)),
-        "US Fluid Ounce (fl oz)": UnitDefinition("US Fluid Ounce", "fl oz", *_linear(0.0295735295625)),
-        "Imperial Gallon (imp gal)": UnitDefinition("Imperial Gallon", "imp gal", *_linear(4.54609)),
+        "US Fluid Ounce (fl oz)": UnitDefinition(
+            "US Fluid Ounce", "fl oz", *_linear(0.0295735295625)
+        ),
+        "Imperial Gallon (imp gal)": UnitDefinition(
+            "Imperial Gallon", "imp gal", *_linear(4.54609)
+        ),
     },
 }
 

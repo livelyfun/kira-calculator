@@ -54,19 +54,16 @@ class ScientificPage(QWidget):
             ("tan", 0, 2),
             ("log", 0, 3),
             ("ln", 0, 4),
-
             ("asin", 1, 0),
             ("acos", 1, 1),
             ("atan", 1, 2),
             ("√", 1, 3),
             ("xʸ", 1, 4),
-
             ("sinh", 2, 0),
             ("cosh", 2, 1),
             ("tanh", 2, 2),
             ("x²", 2, 3),
             ("1/x", 2, 4),
-
             ("π", 3, 0),
             ("e", 3, 1),
             ("!", 3, 2),
@@ -92,22 +89,18 @@ class ScientificPage(QWidget):
             ("⌫", 0, 1, "backspaceButton"),
             ("%", 0, 2, "operatorButton"),
             ("÷", 0, 3, "operatorButton"),
-
             ("7", 1, 0, "numberButton"),
             ("8", 1, 1, "numberButton"),
             ("9", 1, 2, "numberButton"),
             ("×", 1, 3, "operatorButton"),
-
             ("4", 2, 0, "numberButton"),
             ("5", 2, 1, "numberButton"),
             ("6", 2, 2, "numberButton"),
             ("-", 2, 3, "operatorButton"),
-
             ("1", 3, 0, "numberButton"),
             ("2", 3, 1, "numberButton"),
             ("3", 3, 2, "numberButton"),
             ("+", 3, 3, "operatorButton"),
-
             ("±", 4, 0, "numberButton"),
             ("0", 4, 1, "numberButton"),
             (".", 4, 2, "numberButton"),
@@ -125,4 +118,3 @@ class ScientificPage(QWidget):
 
     def set_angle_mode(self, mode: str) -> None:
         self.angle_selector.setCurrentText(mode.upper())
-

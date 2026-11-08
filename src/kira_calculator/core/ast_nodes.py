@@ -55,4 +55,3 @@ class FunctionCallNode(ASTNode):
 
     name: str
     args: list[ASTNode] = field(default_factory=list)
-

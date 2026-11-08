@@ -182,4 +182,3 @@ class ConverterPage(QWidget):
             self._updating = False
         except ValueError:
             self.rate_label.setText("Invalid numerical input")
-

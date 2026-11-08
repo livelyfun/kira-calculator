@@ -24,4 +24,3 @@ __all__ = [
     "format_number",
     "tokenize",
 ]
-

@@ -34,22 +34,18 @@ class StandardPage(QWidget):
             ("⌫", 0, 1, "backspaceButton"),
             ("%", 0, 2, "operatorButton"),
             ("÷", 0, 3, "operatorButton"),
-
             ("7", 1, 0, "numberButton"),
             ("8", 1, 1, "numberButton"),
             ("9", 1, 2, "numberButton"),
             ("×", 1, 3, "operatorButton"),
-
             ("4", 2, 0, "numberButton"),
             ("5", 2, 1, "numberButton"),
             ("6", 2, 2, "numberButton"),
             ("-", 2, 3, "operatorButton"),
-
             ("1", 3, 0, "numberButton"),
             ("2", 3, 1, "numberButton"),
             ("3", 3, 2, "numberButton"),
             ("+", 3, 3, "operatorButton"),
-
             ("±", 4, 0, "numberButton"),
             ("0", 4, 1, "numberButton"),
             (".", 4, 2, "numberButton"),
@@ -64,4 +60,3 @@ class StandardPage(QWidget):
             self.buttons[text] = btn
 
         layout.addLayout(grid)
-

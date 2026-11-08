@@ -52,4 +52,3 @@ def format_number(value: float, max_precision: int = 12) -> str:
         return str_val
     except (InvalidOperation, ValueError):
         return str(value)
-

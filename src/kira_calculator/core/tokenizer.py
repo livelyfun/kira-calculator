@@ -200,9 +200,7 @@ def tokenize(expression: str) -> list[Token]:
             elif name in KNOWN_CONSTANTS:
                 tokens.append(Token(TokenType.CONSTANT, KNOWN_CONSTANTS[name], start_pos))
             else:
-                raise UnknownFunctionError(
-                    f"Unknown identifier '{name}'", position=start_pos
-                )
+                raise UnknownFunctionError(f"Unknown identifier '{name}'", position=start_pos)
             continue
 
         # 8. Unrecognized character
@@ -210,4 +208,3 @@ def tokenize(expression: str) -> list[Token]:
 
     tokens.append(Token(TokenType.EOF, "", length))
     return tokens
-

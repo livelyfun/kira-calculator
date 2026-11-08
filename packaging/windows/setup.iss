@@ -2,7 +2,9 @@
 ; Kira Calculator Windows Installer Configuration
 
 #define MyAppName "Kira Calculator"
+#ifndef MyAppVersion
 #define MyAppVersion "1.0.0"
+#endif
 #define MyAppPublisher "Kira Calculator Contributors"
 #define MyAppURL "https://github.com/livelyfun/kira-calculator"
 #define MyAppExeName "kira-calculator.exe"
@@ -19,7 +21,7 @@ DefaultDirName={autopf}\{#MyAppName}
 DisableProgramGroupPage=yes
 LicenseFile=..\..\LICENSE
 OutputDir=..\..\dist
-OutputBaseFilename=KiraCalculator-1.0.0-windows-x64-Setup
+OutputBaseFilename=KiraCalculator-{#MyAppVersion}-windows-x64-Setup
 SetupIconFile=..\..\assets\icons\kira-calculator.png
 Compression=lzma
 SolidCompression=yes

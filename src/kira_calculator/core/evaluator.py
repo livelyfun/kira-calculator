@@ -112,9 +112,7 @@ class Evaluator:
 
         if node.op == "^":
             if left == 0.0 and right < 0:
-                raise DivisionByZeroError(
-                    "Division by zero in power with negative exponent"
-                )
+                raise DivisionByZeroError("Division by zero in power with negative exponent")
             if left < 0.0 and not right.is_integer():
                 raise CalculatorDomainError(
                     "Domain error: negative base with non-integer exponent is complex"
@@ -128,9 +126,7 @@ class Evaluator:
                 if isinstance(result, complex):
                     raise CalculatorDomainError("Domain error: complex result")
                 if math.isinf(result):
-                    raise CalculatorOverflowError(
-                        "Calculation overflow in power operation"
-                    )
+                    raise CalculatorOverflowError("Calculation overflow in power operation")
                 return float(result)
             except OverflowError as err:
                 raise CalculatorOverflowError(
@@ -165,16 +161,12 @@ class Evaluator:
         # Multi-argument functions
         if name in ("pow", "atan2"):
             if len(node.args) != 2:
-                raise CalculatorSyntaxError(
-                    f"Function '{name}' requires exactly 2 arguments"
-                )
+                raise CalculatorSyntaxError(f"Function '{name}' requires exactly 2 arguments")
             arg0 = self.evaluate(node.args[0])
             arg1 = self.evaluate(node.args[1])
             if name == "pow":
                 return self._eval_binary(
-                    BinaryOpNode(
-                        op="^", left=NumberNode(arg0), right=NumberNode(arg1)
-                    )
+                    BinaryOpNode(op="^", left=NumberNode(arg0), right=NumberNode(arg1))
                 )
             if name == "atan2":
                 rad = math.atan2(arg0, arg1)
@@ -233,17 +225,17 @@ class Evaluator:
             return math.sqrt(arg)
 
         if name == "cbrt":
-            return math.cbrt(arg) if hasattr(math, "cbrt") else (
-                arg ** (1.0 / 3.0) if arg >= 0 else -((-arg) ** (1.0 / 3.0))
+            return (
+                math.cbrt(arg)
+                if hasattr(math, "cbrt")
+                else (arg ** (1.0 / 3.0) if arg >= 0 else -((-arg) ** (1.0 / 3.0)))
             )
 
         if name == "exp":
             try:
                 return math.exp(arg)
             except OverflowError as err:
-                raise CalculatorOverflowError(
-                    "Exponential function overflow"
-                ) from err
+                raise CalculatorOverflowError("Exponential function overflow") from err
 
         if name in ("abs", "fabs"):
             return math.fabs(arg)
@@ -289,9 +281,11 @@ class Evaluator:
     def _sin(self, x: float) -> float:
         if self.angle_mode == AngleMode.DEG:
             norm = x % 360.0
-            if math.isclose(norm, 0.0, abs_tol=1e-12) or math.isclose(
-                norm, 180.0, abs_tol=1e-12
-            ) or math.isclose(norm, 360.0, abs_tol=1e-12):
+            if (
+                math.isclose(norm, 0.0, abs_tol=1e-12)
+                or math.isclose(norm, 180.0, abs_tol=1e-12)
+                or math.isclose(norm, 360.0, abs_tol=1e-12)
+            ):
                 return 0.0
             if math.isclose(norm, 90.0, abs_tol=1e-12):
                 return 1.0
@@ -380,9 +374,7 @@ class Evaluator:
         if self.angle_mode == AngleMode.GRAD:
             norm = x % 200.0
             if math.isclose(norm, 100.0, abs_tol=1e-9):
-                raise CalculatorDomainError(
-                    "tan is undefined at 100 grad + 200 grad*k"
-                )
+                raise CalculatorDomainError("tan is undefined at 100 grad + 200 grad*k")
             if math.isclose(norm, 0.0, abs_tol=1e-12) or math.isclose(
                 norm, 200.0, abs_tol=1e-12
             ):
@@ -411,4 +403,3 @@ class Evaluator:
     def _atan(self, x: float) -> float:
         rad = math.atan(x)
         return self._from_radians(rad)
-

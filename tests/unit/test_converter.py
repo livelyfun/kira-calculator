@@ -21,15 +21,23 @@ class TestUnitConverter(unittest.TestCase):
         # 1 kg = 1000 g
         self.assertAlmostEqual(UnitConverter.convert(1, "Kilogram (kg)", "Gram (g)"), 1000.0)
         # 1 lb = 0.45359237 kg
-        self.assertAlmostEqual(UnitConverter.convert(1, "Pound (lb)", "Kilogram (kg)"), 0.45359237)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Pound (lb)", "Kilogram (kg)"), 0.45359237
+        )
 
     def test_temperature_conversions(self):
         # 0 °C = 32 °F
-        self.assertAlmostEqual(UnitConverter.convert(0, "Celsius (°C)", "Fahrenheit (°F)"), 32.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(0, "Celsius (°C)", "Fahrenheit (°F)"), 32.0
+        )
         # 100 °C = 212 °F
-        self.assertAlmostEqual(UnitConverter.convert(100, "Celsius (°C)", "Fahrenheit (°F)"), 212.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(100, "Celsius (°C)", "Fahrenheit (°F)"), 212.0
+        )
         # -40 °C = -40 °F
-        self.assertAlmostEqual(UnitConverter.convert(-40, "Celsius (°C)", "Fahrenheit (°F)"), -40.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(-40, "Celsius (°C)", "Fahrenheit (°F)"), -40.0
+        )
         # 0 °C = 273.15 K
         self.assertAlmostEqual(UnitConverter.convert(0, "Celsius (°C)", "Kelvin (K)"), 273.15)
         # 300 K to Celsius
@@ -43,7 +51,9 @@ class TestUnitConverter(unittest.TestCase):
         # 1 Megabyte = 1e6 Bytes
         self.assertAlmostEqual(UnitConverter.convert(1, "Megabyte (MB)", "Byte (B)"), 1e6)
         # 1 Mebibyte = 1048576 Bytes
-        self.assertAlmostEqual(UnitConverter.convert(1, "Mebibyte (MiB)", "Byte (B)"), 1048576.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Mebibyte (MiB)", "Byte (B)"), 1048576.0
+        )
 
     def test_time_conversions(self):
         # 1 hour = 3600 seconds
@@ -60,23 +70,39 @@ class TestUnitConverter(unittest.TestCase):
 
     def test_area_conversions(self):
         # 1 sq km = 1e6 sq m
-        self.assertAlmostEqual(UnitConverter.convert(1, "Square Kilometer (km²)", "Square Meter (m²)"), 1e6)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Square Kilometer (km²)", "Square Meter (m²)"), 1e6
+        )
         # 1 hectare = 10000 sq m
-        self.assertAlmostEqual(UnitConverter.convert(1, "Hectare (ha)", "Square Meter (m²)"), 10000.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Hectare (ha)", "Square Meter (m²)"), 10000.0
+        )
         # 1 sq ft = 0.09290304 sq m
-        self.assertAlmostEqual(UnitConverter.convert(1, "Square Foot (ft²)", "Square Meter (m²)"), 0.09290304)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Square Foot (ft²)", "Square Meter (m²)"), 0.09290304
+        )
         # 1 acre in sq m
-        self.assertAlmostEqual(UnitConverter.convert(1, "Acre (ac)", "Square Meter (m²)"), 4046.8564224)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Acre (ac)", "Square Meter (m²)"), 4046.8564224
+        )
 
     def test_volume_conversions(self):
         # 1 cubic meter = 1000 liters
-        self.assertAlmostEqual(UnitConverter.convert(1, "Cubic Meter (m³)", "Liter (L)"), 1000.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Cubic Meter (m³)", "Liter (L)"), 1000.0
+        )
         # 1 liter = 1000 ml
-        self.assertAlmostEqual(UnitConverter.convert(1, "Liter (L)", "Milliliter (mL)"), 1000.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "Liter (L)", "Milliliter (mL)"), 1000.0
+        )
         # 1 US Gallon = 3.785411784 L
-        self.assertAlmostEqual(UnitConverter.convert(1, "US Gallon (gal)", "Liter (L)"), 3.785411784)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "US Gallon (gal)", "Liter (L)"), 3.785411784
+        )
         # 1 US Quart = 0.946352946 L
-        self.assertAlmostEqual(UnitConverter.convert(1, "US Quart (qt)", "Liter (L)"), 0.946352946)
+        self.assertAlmostEqual(
+            UnitConverter.convert(1, "US Quart (qt)", "Liter (L)"), 0.946352946
+        )
 
     def test_zero_and_negative_values(self):
         # Zero conversions
@@ -84,7 +110,9 @@ class TestUnitConverter(unittest.TestCase):
         self.assertEqual(UnitConverter.convert(0, "Celsius (°C)", "Kelvin (K)"), 273.15)
         self.assertEqual(UnitConverter.convert(0, "Byte (B)", "Megabyte (MB)"), 0.0)
         # Negative temperature
-        self.assertAlmostEqual(UnitConverter.convert(-10, "Celsius (°C)", "Fahrenheit (°F)"), 14.0)
+        self.assertAlmostEqual(
+            UnitConverter.convert(-10, "Celsius (°C)", "Fahrenheit (°F)"), 14.0
+        )
 
     def test_decimal_precision(self):
         # High precision preservation
@@ -102,4 +130,3 @@ class TestUnitConverter(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
-

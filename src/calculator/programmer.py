@@ -6,4 +6,3 @@ from kira_calculator.modes.programmer import (  # noqa: F401
     Signedness,
     WordSize,
 )
-

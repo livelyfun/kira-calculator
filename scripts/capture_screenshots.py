@@ -26,7 +26,16 @@ def capture_all():
 
     screenshots = [
         ("standard_dark.png", "Standard", "dark", 720, 600, False, "1337 + 42", "1379"),
-        ("scientific_dark.png", "Scientific", "dark", 780, 640, False, "sin(45)^2 + cos(45)^2", "1"),
+        (
+            "scientific_dark.png",
+            "Scientific",
+            "dark",
+            780,
+            640,
+            False,
+            "sin(45)^2 + cos(45)^2",
+            "1",
+        ),
         ("programmer.png", "Programmer", "dark", 780, 640, False, "", ""),
         ("converter.png", "Converter", "dark", 720, 600, False, "", ""),
         ("standard_light.png", "Standard", "light", 720, 600, False, "2.5 * 4", "10"),
@@ -59,4 +68,3 @@ def capture_all():
 
 if __name__ == "__main__":
     capture_all()
-

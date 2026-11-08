@@ -26,7 +26,7 @@
 | --- | --- | --- |
 | Linux x86_64 | `kira-calculator-<version>-linux-x86_64.tar.gz` | Extract, then run `./bin/kira-calculator` from the extracted folder |
 | Windows x64 | `kira-calculator-windows-x64.zip` | Extract, then open `kira-calculator.exe` |
-| macOS | `kira-calculator-macos-*.zip` | Extract, then run the included executable |
+| macOS | `kira-calculator-macos.zip` | Extract, then move `kira-calculator.app` into Applications |
 
 Release assets and exact filenames are shown on the [Releases page](https://github.com/livelyfun/kira-calculator/releases). Builds are produced on native GitHub-hosted runners. Check the release notes for the platforms included in each version.
 

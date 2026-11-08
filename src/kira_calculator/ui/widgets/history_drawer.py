@@ -113,4 +113,3 @@ class HistoryDrawer(QFrame):
             parts = item.text().split("=")
             if len(parts) > 1:
                 QApplication.clipboard().setText(parts[1].strip())
-

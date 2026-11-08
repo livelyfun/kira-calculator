@@ -116,8 +116,12 @@ class TestEngineScientificFunctions(unittest.TestCase):
         self.assertEqual(calculate("tan(45)", angle_mode="DEG"), "1")
 
     def test_trigonometry_rad(self):
-        self.assertTrue(math.isclose(float(calculate("sin(pi / 6)", angle_mode="RAD")), 0.5, abs_tol=1e-10))
-        self.assertTrue(math.isclose(float(calculate("cos(pi)", angle_mode="RAD")), -1.0, abs_tol=1e-10))
+        self.assertTrue(
+            math.isclose(float(calculate("sin(pi / 6)", angle_mode="RAD")), 0.5, abs_tol=1e-10)
+        )
+        self.assertTrue(
+            math.isclose(float(calculate("cos(pi)", angle_mode="RAD")), -1.0, abs_tol=1e-10)
+        )
 
     def test_trigonometry_grad(self):
         self.assertEqual(calculate("sin(100)", angle_mode="GRAD"), "1")

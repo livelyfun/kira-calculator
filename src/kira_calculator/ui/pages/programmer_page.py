@@ -127,35 +127,30 @@ class ProgrammerPage(QWidget):
             ("NOT", 0, 3, "operatorButton"),
             ("<<", 0, 4, "operatorButton"),
             (">>", 0, 5, "operatorButton"),
-
             ("(", 1, 0, "operatorButton"),
             (")", 1, 1, "operatorButton"),
             ("AC", 1, 2, "clearButton"),
             ("⌫", 1, 3, "backspaceButton"),
             ("=", 1, 4, "equalsButton"),
             ("+", 1, 5, "operatorButton"),
-
             ("7", 2, 0, "numberButton"),
             ("8", 2, 1, "numberButton"),
             ("9", 2, 2, "numberButton"),
             ("-", 2, 3, "operatorButton"),
             ("A", 2, 4, "numberButton"),
             ("B", 2, 5, "numberButton"),
-
             ("4", 3, 0, "numberButton"),
             ("5", 3, 1, "numberButton"),
             ("6", 3, 2, "numberButton"),
             ("*", 3, 3, "operatorButton"),
             ("C", 3, 4, "numberButton"),
             ("D", 3, 5, "numberButton"),
-
             ("1", 4, 0, "numberButton"),
             ("2", 4, 1, "numberButton"),
             ("3", 4, 2, "numberButton"),
             ("/", 4, 3, "operatorButton"),
             ("E", 4, 4, "numberButton"),
             ("F", 4, 5, "numberButton"),
-
             ("0", 5, 0, "numberButton"),
         ]
 
@@ -238,9 +233,7 @@ class ProgrammerPage(QWidget):
 
             # Format bits with grouping for readability
             bit_str = calc.bit_string(raw)
-            grouped_bits = " ".join(
-                bit_str[i : i + 4] for i in range(0, len(bit_str), 4)
-            )
+            grouped_bits = " ".join(bit_str[i : i + 4] for i in range(0, len(bit_str), 4))
             self.bits.setText(grouped_bits)
             self.status.clear()
             self.input_is_error = False
