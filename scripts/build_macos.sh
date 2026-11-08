@@ -8,7 +8,7 @@ DIST_DIR="dist"
 
 echo "=== Building macOS bundle for ${APP_NAME} v${VERSION} ==="
 
-python3 scripts/build_app.py --onefile --archive
+python3 scripts/build_app.py --onedir --archive
 
 if [[ -d "${DIST_DIR}/kira-calculator.app" || -f "${DIST_DIR}/kira-calculator" ]]; then
     echo "macOS build and archive complete in ${DIST_DIR}"

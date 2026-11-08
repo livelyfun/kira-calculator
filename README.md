@@ -135,7 +135,8 @@ ruff format --check .
 Build a standalone package on the current operating system:
 ```bash
 python -m pip install -e ".[packaging]"
-python scripts/build_app.py --onefile
+python scripts/build_app.py --onefile   # Linux and Windows
+python scripts/build_app.py --onedir    # macOS .app bundle
 ```
 
 Cross-platform release packages are built by [GitHub Actions](.github/workflows/ci.yml) on native Linux, Windows, and macOS runners. Push a version tag such as `v1.0.1` to trigger a GitHub Release after the test and packaging jobs succeed.

@@ -23,10 +23,15 @@ Install the packaging extra and build on the target operating system:
 
 ```bash
 python -m pip install -e ".[packaging]"
+
+# Linux and Windows
 python scripts/build_app.py --onefile
+
+# macOS
+python scripts/build_app.py --onedir
 ```
 
-The script creates a PyInstaller single-file executable. On Linux it also creates a compressed distribution archive and SHA256 sidecar. Windows and macOS builds produce their native executable; CI wraps those executables in ZIP archives for release distribution.
+The packaging extra installs PyInstaller and Pillow; Pillow lets PyInstaller convert the source PNG into the native ICO/ICNS icon used by Windows and macOS builds. On Linux and Windows the script creates a single-file executable. On macOS it creates `dist/kira-calculator.app`, a onedir application bundle, and ZIPs the complete bundle together with the README and license. Linux builds also create a compressed distribution archive and SHA256 sidecar.
 
 ## Release workflow
 
@@ -41,7 +46,7 @@ Do not publish a release from a tag until its source tree and version metadata r
 
 - **Linux:** x86_64 build from `ubuntu-latest`. The target machine must provide compatible system libraries for the Qt platform plugin.
 - **Windows:** x64 executable in a ZIP archive. The executable is not currently code-signed.
-- **macOS:** executable in a ZIP archive. The build is not currently signed or notarized; Gatekeeper may show a warning.
+- **macOS:** onedir `.app` application bundle in a ZIP archive. The build is not currently signed or notarized; Gatekeeper may show a warning.
 
 The binaries bundle the application and Python/Qt dependencies through PyInstaller. Users do not need to install Python separately.
 

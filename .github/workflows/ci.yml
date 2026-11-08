@@ -65,10 +65,13 @@ jobs:
         include:
           - os: ubuntu-latest
             artifact-name: kira-calculator-linux-x86_64
+            build-args: --onefile
           - os: windows-latest
             artifact-name: kira-calculator-windows-x64
+            build-args: --onefile
           - os: macos-latest
             artifact-name: kira-calculator-macos
+            build-args: --onedir
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -82,16 +85,21 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libxkbcommon-x11-0 libegl1 libgl1-mesa-dev libxcb-cursor0
       - name: Build standalone executable
-        run: python scripts/build_app.py --onefile
+        run: python scripts/build_app.py ${{ matrix.build-args }}
       - name: Prepare Windows archive
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
           Compress-Archive -Path dist/kira-calculator.exe -DestinationPath dist/kira-calculator-windows-x64.zip
-      - name: Prepare macOS archive
+      - name: Verify macOS archive
         if: runner.os == 'macOS'
         run: |
-          ditto -c -k --sequesterRsrc --keepParent dist/kira-calculator.app dist/kira-calculator-macos.zip
+          unzip -l dist/kira-calculator-macos.zip
+          unzip -l dist/kira-calculator-macos.zip | grep -q "kira-calculator.app/"
+          unzip -l dist/kira-calculator-macos.zip | grep -q "kira-calculator.app/Contents/Info.plist"
+          unzip -l dist/kira-calculator-macos.zip | grep -q "kira-calculator.app/Contents/MacOS/kira-calculator"
+          unzip -l dist/kira-calculator-macos.zip | grep -q "README.md"
+          unzip -l dist/kira-calculator-macos.zip | grep -q "LICENSE"
       - name: Upload Linux package
         if: runner.os == 'Linux'
         uses: actions/upload-artifact@v4

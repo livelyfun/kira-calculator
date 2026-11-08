@@ -19,6 +19,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DIST = ROOT / "dist"
 BUILD = ROOT / "build"
 PACKAGING = ROOT / "packaging"
+APP_NAME = "kira-calculator"
 
 EXCLUDED_MODULES = [
     "PySide6.QtWebEngineCore",
@@ -123,7 +124,7 @@ def run_command(cmd: list[str]) -> None:
     subprocess.check_call(cmd, cwd=ROOT)
 
 
-def build_pyinstaller(onefile: bool = False, clean: bool = True) -> Path:
+def build_pyinstaller(onefile: bool = True, clean: bool = True) -> Path:
     """Invoke PyInstaller to generate optimized standalone binaries."""
     entry = ROOT / "src" / "kira_calculator" / "__main__.py"
     icon = ROOT / "assets" / "icons" / "kira-calculator.png"
@@ -189,6 +190,17 @@ def build_pyinstaller(onefile: bool = False, clean: bool = True) -> Path:
             )
 
     return output_path
+
+
+def archive_target(output_path: Path, onefile: bool) -> Path:
+    """Return the file or directory that the platform archive should contain."""
+    if sys.platform == "darwin":
+        # A windowed macOS build is always distributed as an .app bundle,
+        # regardless of whether its executable was built as onefile or onedir.
+        return DIST / f"{APP_NAME}.app"
+    if onefile:
+        return output_path
+    return DIST / APP_NAME
 
 
 def package_tarball(app_dir: Path, version: str | None = None) -> Path:
@@ -272,27 +284,66 @@ def package_zip_windows(binary_path: Path, version: str | None = None) -> Path:
 
 
 def package_zip_macos(target_path: Path, version: str | None = None) -> Path:
-    """Create a distributable ZIP archive for macOS."""
+    """Create a distributable ZIP archive for macOS.
+
+    On macOS, ``ditto`` is used so the ``.app`` bundle keeps its symlinks and
+    extended attributes. Other platforms fall back to ``zipfile`` for local
+    archive inspection and testing.
+    """
     archive_name = "kira-calculator-macos.zip"
     archive_path = DIST / archive_name
+    if archive_path.exists():
+        archive_path.unlink()
 
     print(f"\nCreating macOS release archive: {archive_path}")
-    with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zf:
-        if target_path.is_dir():
-            for root, _, files in os.walk(target_path):
-                for file in files:
-                    full_path = Path(root) / file
-                    rel = full_path.relative_to(target_path.parent)
-                    zf.write(full_path, arcname=str(rel))
-        else:
-            zf.write(target_path, arcname=f"kira-calculator/{target_path.name}")
 
-        readme = ROOT / "README.md"
-        if readme.exists():
-            zf.write(readme, arcname="README.md")
-        license_file = ROOT / "LICENSE"
-        if license_file.exists():
-            zf.write(license_file, arcname="LICENSE")
+    if sys.platform == "darwin" and shutil.which("ditto"):
+        staging = DIST / "macos-release"
+        shutil.rmtree(staging, ignore_errors=True)
+        staging.mkdir(parents=True)
+        try:
+            destination = staging / target_path.name
+            if target_path.is_dir():
+                shutil.copytree(target_path, destination, symlinks=True)
+            else:
+                shutil.copy2(target_path, destination)
+
+            for doc_name in ("README.md", "LICENSE"):
+                doc = ROOT / doc_name
+                if doc.exists():
+                    shutil.copy2(doc, staging / doc_name)
+
+            # Archive the staging directory's contents (no --keepParent) so the
+            # .app bundle, README, and LICENSE sit at the root of the ZIP.
+            subprocess.check_call(
+                [
+                    "ditto",
+                    "-c",
+                    "-k",
+                    "--sequesterRsrc",
+                    str(staging),
+                    str(archive_path),
+                ]
+            )
+        finally:
+            shutil.rmtree(staging, ignore_errors=True)
+    else:
+        with zipfile.ZipFile(archive_path, "w", zipfile.ZIP_DEFLATED) as zf:
+            if target_path.is_dir():
+                for root, _, files in os.walk(target_path):
+                    for file in files:
+                        full_path = Path(root) / file
+                        rel = full_path.relative_to(target_path.parent)
+                        zf.write(full_path, arcname=str(rel))
+            else:
+                zf.write(target_path, arcname=f"kira-calculator/{target_path.name}")
+
+            readme = ROOT / "README.md"
+            if readme.exists():
+                zf.write(readme, arcname="README.md")
+            license_file = ROOT / "LICENSE"
+            if license_file.exists():
+                zf.write(license_file, arcname="LICENSE")
 
     checksum = sha256_file(archive_path)
     checksum_file = archive_path.parent / f"{archive_path.name}.sha256"
@@ -418,12 +469,20 @@ def main() -> int:
         default="",
         help="Validate that a git tag string matches the project version",
     )
-    parser.add_argument(
+    build_mode = parser.add_mutually_exclusive_group()
+    build_mode.add_argument(
         "--onefile",
+        dest="onefile",
         action="store_true",
-        default=True,
-        help="Build single standalone executable",
+        help="Build a single standalone executable (default)",
     )
+    build_mode.add_argument(
+        "--onedir",
+        dest="onefile",
+        action="store_false",
+        help="Build an application directory (required for macOS .app bundles)",
+    )
+    parser.set_defaults(onefile=True)
     parser.add_argument(
         "--archive",
         action="store_true",
@@ -486,16 +545,10 @@ def main() -> int:
     print(f"\nSuccessfully built optimized binary: {binary_path} ({size_mb:.1f} MB)")
 
     if args.archive or args.tarball:
-        dist_dir = (
-            DIST / "kira-calculator"
-            if not args.onefile
-            else (
-                DIST / "kira-calculator.app"
-                if (DIST / "kira-calculator.app").exists()
-                else binary_path
-            )
+        package_archive(
+            archive_target(binary_path, args.onefile),
+            version=project_version,
         )
-        package_archive(dist_dir, version=project_version)
 
     if args.appimage and platform.system().lower() == "linux":
         package_appimage(binary_path, version=project_version)
