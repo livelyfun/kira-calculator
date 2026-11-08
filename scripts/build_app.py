@@ -129,9 +129,13 @@ def build_pyinstaller(onefile: bool = False, clean: bool = True) -> Path:
     cmd.append(str(entry))
     run_command(cmd)
 
-    output_path = DIST / ("kira-calculator" if not sys.platform.startswith("win") else "kira-calculator.exe")
-    if not onefile:
-        output_path = DIST / "kira-calculator" / ("kira-calculator" if not sys.platform.startswith("win") else "kira-calculator.exe")
+    if sys.platform == "darwin":
+        # PyInstaller creates a macOS .app bundle for windowed applications.
+        output_path = DIST / "kira-calculator.app"
+    else:
+        output_path = DIST / ("kira-calculator.exe" if sys.platform.startswith("win") else "kira-calculator")
+        if not onefile:
+            output_path = DIST / "kira-calculator" / ("kira-calculator.exe" if sys.platform.startswith("win") else "kira-calculator")
 
     return output_path
 
